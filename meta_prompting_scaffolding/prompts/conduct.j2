@@ -1,0 +1,12 @@
+{% include instance.system_template %}
+
+<message_history>
+{% for message in instance.history %}
+{{ message.role }}:
+{{ message.content }}
+
+{% endfor %}
+</message_history>
+
+ROUND {{ round }}:
+{{ reminder }}

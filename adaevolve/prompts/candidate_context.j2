@@ -1,0 +1,17 @@
+
+Task and candidate requirements:
+<task>{{ instance.task }}</task>
+{{ instance.score_direction }} scores are better.
+
+Evaluator source or scoring specification:
+<evaluator>{{ instance.evaluator_context }}</evaluator>
+
+Parent (score {{ parent.score }}):
+<parent>{{ parent.content }}</parent>
+Evaluator feedback: {{ parent.feedback }}
+
+Consider these alternative approaches:
+{% for candidate in inspirations %}
+<inspiration score="{{ candidate.score }}">{{ candidate.content }}</inspiration>
+Evaluator feedback: {{ candidate.feedback }}
+{% endfor %}

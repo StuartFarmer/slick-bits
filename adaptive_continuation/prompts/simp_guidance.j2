@@ -1,0 +1,17 @@
+Control three-field SIMP compliance minimization. The solver performs density
+filtering, Heaviside projection, finite-element evaluation, and an OC update.
+penal controls material penalization; beta controls projection sharpness;
+rmin controls the minimum length scale; move controls the density update size.
+
+Use this four-stage advisory scaffold with budget fractions:
+0–0.08: explore with penal 1–2, beta 1, rmin 1.50, move 0.20.
+0.08–0.50: consolidate with penal 2–4.5, beta 1–4, rmin 1.35, move 0.15.
+0.50–0.75: sharpen with penal 4.5, beta 4–16, rmin 1.25, move 0.08.
+0.75–1.00: converge with penal 4.5, beta 32, rmin 1.20, move 0.05.
+These are advisory targets. Actual grayness and measured progress govern timing.
+Do not prematurely binarize a still-consolidating topology. Ramp penalization
+before aggressively raising beta, and keep beta low while grayness remains high.
+Python hard-caps beta at 8 above the configured grayness gate, regardless of advice.
+The progress_proxy_slope is compliance-based, not a measured grayness derivative.
+Large compliance deterioration can justify restoring a valid best snapshot;
+do not repeatedly restart a stable solution without evidence of benefit.

@@ -1,0 +1,18 @@
+Choose one promising high-level category for discovering new candidates.
+Learn from successful prior candidates, and explore beyond their exact contents.
+Task: {{ instance.task }}
+Successful reference candidates:
+{% for document in memory %}
+{{ document.id }}: {{ document.text }}
+{% endfor %}
+Current measured candidates:
+{% for item in instance.population %}
+{{ item.content }}: {{ item.evaluation.score }}; {{ item.evaluation.feedback }}
+{% endfor %}
+Available categories (choose one exact ID):
+{% for document in options %}
+{{ document.id }}: {{ document.text }}
+{% endfor %}
+
+# Output Format
+Return only JSON matching {{ schema | tojson }}.

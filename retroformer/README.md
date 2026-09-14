@@ -1,0 +1,17 @@
+# Retroformer
+
+`Retroformer` implements the offline reflection-learning pipeline from [Yao et al., ICLR 2024](https://arxiv.org/abs/2308.02151). A frozen actor executes tasks; a separate trainable model writes reflections. Pairs of reflections are rated by the change in the actor's next return. Positive ratings provide supervised warmup, pairwise preferences train a reward model, and PPO updates the reflection policy against that learned reward with a frozen-reference KL penalty. Inference samples multiple reflections and uses the learned reward to choose one before running the actor.
+
+The official author repository is [weirayao/Retroformer](https://github.com/weirayao/Retroformer). Inspected files: [SFT entrypoint](https://github.com/weirayao/Retroformer/blob/main/sft_run.py), [reward entrypoint](https://github.com/weirayao/Retroformer/blob/main/reward_run.py), [PPO entrypoint](https://github.com/weirayao/Retroformer/blob/main/ppo_run.py), and [trainer construction](https://github.com/weirayao/Retroformer/blob/main/trainer/ppo_trainer.py). There are source/paper differences: the reward script contains binary-classification and inconsistent data-column code, while paper Algorithm 1 specifies chosen/rejected reward training; the SFT script also lacks the paper's explicit positive-rating filter. This port follows the paper's pairwise and positive-only stages.
+
+```python
+agent = Retroformer(task, rollout, generate, policy, reward)
+result = await agent.run(policy_parameters, reward_parameters, training_queries)
+output = await agent.improve(new_query, trials=3, best_of=4)
+```
+
+All model/environment primitives are async. `rollout(query, reflection)` returns `Episode(trajectory, score, success)`, with higher return better. It owns the frozen actor, environment reset, and execution isolation. `generate(parameters, context, seed)` samples reflection text. `policy(parameters, context, reflection)` returns summed response log probability, its parameter gradient, scalar value and value gradient. `reward(reward_parameters, context, reflection)` returns a scalar reward score and gradient. Flat NumPy parameter vectors are updated locally; adapters do not implement training loops. The local `reflect.j2` is a task-neutral adaptation of the paper's domain prompts. Configure Slick's process-global template root once before running.
+
+This is a **one-step reflection-bandit PPO reconstruction**, consistent with the paper's Eq. 6 view of a complete reflection as one action. It uses sequence probability ratios, fixed KL coefficient, clipped policy/value objectives and local Adam. The released TRL trainer instead implements token-level PPO with its own normalization, KL controller and batching; checkpoint or training-trajectory equivalence is not claimed. Supervised loss uses sequence log likelihood. Offline continuation follows the higher-return sampled branch; ties supply no preference pair. Already successful tasks create no reflection data. Missing pairs leave the supplied reward parameters unchanged.
+
+Offline environment calls are at most `queries * (1 + 2 * trials)`. PPO calls the learned reward only; it never reruns the actor. Inference uses at most `1 + trials` environment calls and `trials * best_of` reflections. Blank reflections, nonfinite scores/derivatives and model errors propagate without retries. Tests verify rating differences, pairwise/PPO derivatives, and learned-reward selection, without paid calls or training a large model.

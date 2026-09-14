@@ -1,0 +1,7 @@
+<conversation>
+{% for message in instance.messages %}
+<message speaker="{{ message.speaker }}">
+{{ message.content }}
+</message>
+{% endfor %}
+</conversation>

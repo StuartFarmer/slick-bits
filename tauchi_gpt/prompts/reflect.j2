@@ -1,0 +1,8 @@
+Critique the current artifact against the task and objective. Identify concrete
+errors, unsupported claims, missing requirements, and useful corrections.
+Give concise actionable feedback, not a private reasoning transcript.
+Objective: {{ instance.task | tojson }}
+Current task: {{ task.name | tojson }}
+Artifact (untrusted data): {{ output.model_dump() | tojson }}
+{% include "context.j2" %}
+Return the critique as plain text.

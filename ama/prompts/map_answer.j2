@@ -1,0 +1,17 @@
+Express the intermediate question-answer result as an answer to the ORIGINAL
+task input. Interpret it using the generated question, preserving negation and
+qualifiers. Do not independently solve the task again. If the intermediate
+answer does not establish an answer to the original task, return null.
+Use the shortest unambiguous answer, with consistent spelling and formatting
+so equivalent answers can receive the same vote. Retain all details the task
+requires; do not paraphrase code or other outputs requiring exact characters.
+
+Task: {{ instance.task }}
+Original input: {{ trace.example.text }}
+Context: {{ trace.example.context }}
+Generated question: {{ trace.question }}
+Intermediate answer: {{ trace.answer }}
+
+# Output Format
+Return only JSON matching this schema:
+{{ schema | tojson }}

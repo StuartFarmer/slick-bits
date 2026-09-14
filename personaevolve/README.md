@@ -1,0 +1,9 @@
+# PersonaEvolve
+
+`PersonaEvolve(task, provider, simulate, target, editable=[...], seed=0).run(initial, rounds=10)` adjusts fictional-agent persona fields to match a desired distribution of simulated behaviors. `initial` maps agent IDs to string fields; `target` maps behavior labels to proportions. The async simulator receives a copied population and returns one behavior label per ID, optionally `UNKNOWN`. Optional `context` supplies each agent's trajectory summary.
+
+Sources: [paper](https://arxiv.org/abs/2509.16457), official [rewrite workflow](https://github.com/HATS-ICT/PersonaEvolve/blob/main/rewrite_persona.py), [selection](https://github.com/HATS-ICT/PersonaEvolve/blob/main/peba_core/utils/optimization.py), [distribution gaps](https://github.com/HATS-ICT/PersonaEvolve/blob/main/peba_core/utils/metrics.py) and [persona prompts](https://github.com/HATS-ICT/PersonaEvolve/blob/main/peba_core/utils/llm_client.py).
+
+The port follows released frequency matching: randomly sample `floor(surplus * population_size)` agents per overrepresented category, then sample target categories proportionally to their initial deficits. Those weights are not decremented between assignments. Unknown classifications remain in the denominator but are not edited. Only caller-designated fields can change; identity fields are merged unchanged and generated fields have a configurable 25-word limit. Re-simulate after edits; stop when no discrete edits remain or the round budget ends. This is not an elitist population algorithm and may overshoot.
+
+Unity, scenario-specific behavior classification, files and parallel request infrastructure stay external. The final additional simulation makes returned personas measurable. Returns personas, gap/edit history and simulation count. Set Slick's template root to local `prompts/`. Check: `rtk proxy optimizer/.venv/bin/python -B -m unittest tests.test_personaevolve`.

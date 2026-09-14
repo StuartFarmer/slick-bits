@@ -1,0 +1,13 @@
+We will refine a task-model prompt in two stages. First analyze examples and
+identify precise changes; then the next stage will use that analysis to revise it.
+Task: {{ instance.task }}
+Current instruction: {{ instruction }}
+Actual full template showing where the instruction and input are placed:
+{{ context }}
+Observed examples: {{ examples | tojson }}
+For each example compare the output to its correct label; determine whether the
+output follows the current instruction; determine whether the instruction itself
+describes the input-label task correctly; decide whether a prompt edit is needed;
+and give specific actionable changes. Labels are authoritative even if the
+instruction is wrong. Use any recorded model reasoning to diagnose the mismatch.
+Return the analysis for the revision stage.

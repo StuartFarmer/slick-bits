@@ -1,0 +1,6 @@
+INSTRUCTION: {{ mutation }}
+A List of Responses in descending order of score. ({{ parents | length + 1 }}) is the best response. It resembles ({{ parents | length }}) more than it does (1).
+{% for parent in parents %}
+({{ loop.index }}) {{ parent }}
+{% endfor %}
+({{ parents | length + 1 }})

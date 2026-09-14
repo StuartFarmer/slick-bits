@@ -1,0 +1,4 @@
+Generate a specific potential edge case for this task: {{ instance.task }}.
+Ask the user what behavior they want on that case. Address a different aspect of the {{ instance.representation }} from the cases already asked about.
+Previous questions and answers: {{ history | tojson }}
+Return the edge-case question in JSON matching {{ schema | tojson }}.

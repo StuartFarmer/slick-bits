@@ -1,0 +1,7 @@
+Assess this hierarchical prompt before considering execution errors. Identify
+missing context, ambiguity, redundancy, incorrect examples, grammar, and structural
+problems. Preserve essential task information. Limit each section to six examples.
+Task: {{ instance.task }}
+Prompt tree: {{ tree | tojson }}
+Reference sections by exact title paths. Return an empty feedback list when no
+change is warranted. Return JSON matching this schema: {{ schema | tojson }}

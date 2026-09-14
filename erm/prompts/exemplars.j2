@@ -1,0 +1,6 @@
+Task: {{ instance.task }}
+Instruction: {{ instruction }}
+Incorrect examples (question, expected answer, and observed response): {{ failures | tojson }}
+Select typical wrong examples and supply detailed correct solution processes.
+Copy each selected question and expected answer exactly. Return JSON matching
+{{ schema | tojson }}.

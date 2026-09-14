@@ -1,0 +1,11 @@
+Organize the extracted evidence into distinct conceptual categories of predictive signals.
+Task: {{ instance.task }}
+Candidate interface: {{ instance.candidate_interface }}
+
+<evidence>
+{{ content }}
+</evidence>
+
+Use task-appropriate category names. Aim for complementary mechanisms; different
+names do not establish statistical independence. Return no duplicate categories.
+Return JSON matching this schema: {{ schema | tojson }}

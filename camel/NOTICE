@@ -1,0 +1,18 @@
+CAMEL role-playing adaptation for Slick
+
+This folder adapts algorithm logic and prompt templates from:
+CAMEL-AI, https://github.com/camel-ai/camel
+Release v0.1.0, commit bda4bf43bb03092936c2c0316aee9ff96aa551bf
+Licensed under Apache License 2.0; see LICENSE.
+
+The task, assistant, user, and critic prompt wording was adapted from
+camel/prompts/ai_society.py. Role-playing and proposal-selection behavior was
+adapted from camel/agents/role_playing.py and camel/agents/critic_agent.py.
+Changes include Slick decorators, external Jinja templates, explicit transcript
+rendering, caller-supplied providers, typed critic selection, protocol guards,
+and explicit failure records. The solution extraction prompt is from Appendix H
+of the user-supplied CAMEL paper.
+
+Paper: Guohao Li, Hasan Abed Al Kader Hammoud, Hani Itani, Dmitrii Khizbullin,
+and Bernard Ghanem. CAMEL: Communicative Agents for “Mind” Exploration of Large
+Language Model Society (2023).

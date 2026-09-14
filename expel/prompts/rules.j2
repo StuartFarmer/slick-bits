@@ -1,0 +1,21 @@
+Existing rules (number, content, importance):
+{% for insight in instance.insights %}
+{{ loop.index }}. {{ insight.text }} [importance: {{ insight.importance }}]
+{% endfor %}
+
+Return at most four operations, one per line, using exactly this format:
+UPVOTE <EXISTING RULE NUMBER>: <EXACT EXISTING RULE TEXT>
+DOWNVOTE <EXISTING RULE NUMBER>: <EXACT EXISTING RULE TEXT>
+EDIT <EXISTING RULE NUMBER>: <IMPROVED RULE TEXT>
+ADD <NEW RULE NUMBER>: <NEW RULE TEXT>
+
+UPVOTE strongly relevant rules. DOWNVOTE contradictory, redundant, or unsupported
+rules. EDIT rules that need to be more general or precise. ADD distinct new rules.
+Each existing rule can receive at most one operation. Use the numbering shown
+above throughout this response. Number new rules consecutively starting at
+{{ instance.insights | length + 1 }}; do not vote on or edit newly added rules.
+New rules start at importance 2; UPVOTE and EDIT add 1, DOWNVOTE subtracts 1.
+Rules reaching zero are removed after the batch. Unmentioned rules stay unchanged.
+Keep each rule concise and generally applicable. Do not mention these trials.
+Do not duplicate existing rule text. Output only operation lines without Markdown,
+or exactly NONE if the evidence does not justify any changes.

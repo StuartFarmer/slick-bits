@@ -1,0 +1,19 @@
+Improve the supplied heuristic through local adjustments while preserving its
+core approach and strengths on the instances it handles well.
+
+<task>
+{{ instance.task }}
+</task>
+
+<parent>
+{{ parent.model_dump() | tojson }}
+</parent>
+
+Scores are costs for individual instances; lower is better. First describe the
+revised heuristic and its main steps in one sentence. Then provide the complete
+candidate artifact satisfying the task's format and interface.
+
+# Output Format
+Return only JSON matching this schema, with the thought in description and the
+complete artifact in content; do not wrap the JSON in Markdown fences.
+{{ schema | tojson }}

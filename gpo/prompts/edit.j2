@@ -1,0 +1,6 @@
+Task: {{ instance.task }}
+Instruction: {{ instruction }}
+Current feedback and accumulated textual momentum: {{ feedback | tojson }}
+Task examples: {{ examples | tojson }}
+Improve this instruction using the feedback. You are allowed to change up to {{ words }}
+words. Return only the complete instruction between <START> and <END>.

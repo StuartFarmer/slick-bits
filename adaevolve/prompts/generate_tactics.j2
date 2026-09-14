@@ -1,0 +1,35 @@
+Propose one to three concrete, distinct solution tactics to escape stagnation.
+
+1. Understand the evaluator: objective, metrics, constraints, validations, penalties,
+   and what the candidate can influence.
+2. Analyze the current best candidate: its approach, strengths, and specific bottlenecks.
+3. Review recent attempts and tactic outcomes. Avoid failed approaches and close
+   variants unless the root cause is explicitly addressed.
+4. Propose fundamentally different tactics, each targeting a distinct weakness or metric.
+5. Make each tactic actionable under the task's available resources. Name concrete
+   techniques and parameters. Prefer simple, robust mechanisms and handle edge cases.
+6. Check feasibility, correctness, diversity, and alignment with the true objective.
+
+Task:
+<task>{{ instance.task }}</task>
+{{ instance.score_direction }} scores are better.
+
+Evaluator source or scoring specification:
+<evaluator>{{ instance.evaluator_context }}</evaluator>
+
+Current best candidate (score {{ best.score }}):
+<best>{{ best.content }}</best>
+Evaluator feedback: {{ best.feedback }}
+
+Recent attempts, including failures and measured outcomes:
+{{ recent | tojson }}
+
+Past tactics and their individual observed improvements:
+{{ tried | tojson }}
+
+Return strategic directives, not replacement candidates. Each must explain why
+it can improve the score while preserving the task constraints.
+
+# Output Format
+Return only JSON matching this schema:
+{{ schema | tojson }}

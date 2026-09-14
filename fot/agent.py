@@ -112,7 +112,9 @@ class ForestOfThought:
         self.nodes: dict[int, list[Node]] = {}
 
     @prompt(template="propose.j2", output_type=Candidates)
-    async def propose(self, previous: dict, count: int, *, generated: Candidates) -> list[Candidate]:
+    async def propose(
+        self, previous: dict, count: int, *, generated: Candidates
+    ) -> list[Candidate]:
         """Produce sibling continuations; an empty list represents a dead end."""
         if len(generated.candidates) > count:
             raise ValueError("proposal exceeds candidate limit")
@@ -187,7 +189,9 @@ class ForestOfThought:
         self.threshold, self.max_calls = correction_threshold, max_calls
         self.calls, self.assessments, self.corrections, self.callbacks = [], [], [], []
         self.history, self.nodes, self.verified = [], {}, None
-        self.knowledge = await self._external("retrieve", self.retrieve, self.task) if self.retrieve else ""
+        self.knowledge = (
+            await self._external("retrieve", self.retrieve, self.task) if self.retrieve else ""
+        )
         forest, solutions, exhausted = [], [], False
         build_tree = {"tot": self._beam_tree, "mctsr": self._mctsr_tree}[search]
         for self.tree_index in range(trees):
@@ -198,7 +202,14 @@ class ForestOfThought:
                 forest.append(Tree(self.tree_index, False, None, "budget_exhausted"))
                 exhausted = True
                 break
-            forest.append(Tree(self.tree_index, solution is not None, solution, "complete" if solution else "inactive"))
+            forest.append(
+                Tree(
+                    self.tree_index,
+                    solution is not None,
+                    solution,
+                    "complete" if solution else "inactive",
+                )
+            )
             if solution is not None:
                 solutions.append(solution)
             if self.verified is not None:
@@ -229,7 +240,9 @@ class ForestOfThought:
                         seen.add(key)
                         children.append((candidate, evaluation.score))
             frontier = sorted(children, key=lambda item: item[1], reverse=True)[: self.breadth]
-            self.history.append({"tree": self.tree_index, "frontier": tuple(c for c, _ in frontier)})
+            self.history.append(
+                {"tree": self.tree_index, "frontier": tuple(c for c, _ in frontier)}
+            )
             if not frontier:
                 return None
             if all(candidate.answer is not None for candidate, _ in frontier):
@@ -246,13 +259,16 @@ class ForestOfThought:
         if prepared is None:
             return None
         candidate, evaluation = prepared
-        nodes = self.nodes[self.tree_index] = [Node(candidate, evaluation, rewards=[evaluation.score])]
+        nodes = self.nodes[self.tree_index] = [
+            Node(candidate, evaluation, rewards=[evaluation.score])
+        ]
         for _ in range(self.rollouts):
             if self.verified is not None:
                 return self.verified
             ucb = self._ucb(nodes)
             eligible = [
-                i for i, node in enumerate(nodes)
+                i
+                for i, node in enumerate(nodes)
                 if len(node.children) < self.candidates
                 or max(nodes[j].reward for j in node.children) < node.reward
             ]
@@ -262,6 +278,8 @@ class ForestOfThought:
             parent = nodes[index]
             parent.evaluation = await self._evaluate(parent.candidate)
             parent.rewards.append(parent.evaluation.score)
+            if not parent.evaluation.valid:
+                return None
             child = await self._invoke(self.refine, parent.candidate, parent.evaluation.feedback)
             prepared = await self._prepare(child)
             if prepared is None:
@@ -286,7 +304,11 @@ class ForestOfThought:
             if node.children:
                 reward = (reward + max(nodes[i].reward for i in node.children)) / 2
             parent_visits = len(nodes[node.parent].rewards) if node.parent is not None else 0
-            values.append(reward + self.exploration * math.sqrt(math.log(parent_visits + 1) / (len(node.rewards) + 1e-5)))
+            values.append(
+                reward
+                + self.exploration
+                * math.sqrt(math.log(parent_visits + 1) / (len(node.rewards) + 1e-5))
+            )
         return values
 
     async def _prepare(self, candidate: Candidate) -> tuple[Candidate, Evaluation] | None:
@@ -297,14 +319,18 @@ class ForestOfThought:
             if self.correct is None:
                 revised = await self._invoke(self.correct_candidate, candidate, evaluation.feedback)
             else:
-                revised = await self._external("correct", self.correct, candidate, evaluation.feedback)
+                revised = await self._external(
+                    "correct", self.correct, candidate, evaluation.feedback
+                )
             record["revised"] = revised
             if revised is None:
                 return None
             revised_evaluation = await self._evaluate(revised)
             complete = candidate.answer is None or revised.answer is not None
-            if complete and revised_evaluation.valid and (
-                not evaluation.valid or revised_evaluation.confidence > evaluation.confidence
+            if (
+                complete
+                and revised_evaluation.valid
+                and (not evaluation.valid or revised_evaluation.confidence > evaluation.confidence)
             ):
                 candidate, evaluation = revised, revised_evaluation
                 record["accepted"] = True
@@ -321,9 +347,16 @@ class ForestOfThought:
         record = {"tree": self.tree_index, "candidate": candidate}
         self.assessments.append(record)
         try:
-            evaluation = await self.evaluate(candidate) if self.evaluate else await self._invoke(self.assess, candidate)
+            evaluation = (
+                await self.evaluate(candidate)
+                if self.evaluate
+                else await self._invoke(self.assess, candidate)
+            )
             record["evaluation"] = evaluation
-            if not all(math.isfinite(value) and 0 <= value <= 1 for value in (evaluation.score, evaluation.confidence)):
+            if not all(
+                math.isfinite(value) and 0 <= value <= 1
+                for value in (evaluation.score, evaluation.confidence)
+            ):
                 raise ValueError("measured score and confidence must be finite and in [0, 1]")
             return evaluation
         except Exception as exc:
@@ -336,7 +369,11 @@ class ForestOfThought:
         keys = [self.answer_key(solution.answer) for solution in solutions]
         counts = Counter(keys)
         key, count = counts.most_common(1)[0]
-        agreement = count > total / 2 if policy == "majority" else sum(n == count for n in counts.values()) == 1
+        agreement = (
+            count > total / 2
+            if policy == "majority"
+            else sum(n == count for n in counts.values()) == 1
+        )
         return solutions[keys.index(key)] if agreement else None
 
     async def _decide(self, solutions, forest, consensus, exhausted) -> Result:
@@ -380,7 +417,9 @@ class ForestOfThought:
         """Record raw responses before Slick parses or checks generated output."""
         record = self.calls[-1]
         record["prompt"] = context
-        response, requests = await self.provider.acall(context, tools=tools, tool_results=tool_results)
+        response, requests = await self.provider.acall(
+            context, tools=tools, tool_results=tool_results
+        )
         record["response"] = response
         if requests:
             raise ValueError("FoT requires text responses, not tool requests")

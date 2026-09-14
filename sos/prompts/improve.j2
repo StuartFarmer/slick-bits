@@ -1,0 +1,6 @@
+Task: {{ instance.task }}
+Improve the instruction for the objective: {{ objective }}
+Instruction: {{ instruction }}
+Feedback: {{ feedback }}
+Retain useful behavior for the other objectives: {{ instance.objectives | tojson }}
+Return JSON matching {{ schema | tojson }}.

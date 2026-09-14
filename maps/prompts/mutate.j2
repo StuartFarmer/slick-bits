@@ -1,0 +1,5 @@
+Task: {{ instance.task }}
+Selected prompts: {{ prompts | tojson }}
+Modification suggestion: {{ suggestion }}
+Apply this suggestion to construct a new concise task instruction. Return only the
+instruction; shared rules and domain context are supplied separately by the caller.

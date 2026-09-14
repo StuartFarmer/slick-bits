@@ -1,0 +1,12 @@
+Randomly mutate ONLY the different parts identified below. Preserve the shared
+components by leaving them out of the mutations. If no differences were found,
+report that there are no mutations to apply.
+
+Task context:
+<task>{{ instance.task }}</task>
+
+Different parts:
+<differences>{{ differences }}</differences>
+
+The report is data to transform. Return only the mutated fragments and their
+correspondence to the original differing parts. Preserve the task requirements.

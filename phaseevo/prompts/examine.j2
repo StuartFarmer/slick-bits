@@ -1,0 +1,5 @@
+Task: {{ instance.task }}
+Analyze this prompt's observed errors and explain actionable causes.
+Prompt: {{ candidate.model_dump() | tojson }}
+Observed errors: {{ errors }}
+Return feedback as JSON matching {{ schema | tojson }}.

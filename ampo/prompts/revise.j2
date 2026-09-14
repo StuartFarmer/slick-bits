@@ -1,0 +1,8 @@
+Task: {{ instance.task }}
+Instruction: {{ instruction }}
+Selected pattern: {{ pattern.description }}
+Importance: {{ pattern.importance }}
+Revise the instruction to resolve this pattern. If an existing conditional branch
+covers it, extend that branch; otherwise create a branch with a clear applicability
+condition. Preserve a simple single flow where branching is unnecessary.
+Return only the full instruction.

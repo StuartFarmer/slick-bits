@@ -1,0 +1,6 @@
+Task: {{ instance.task }}
+Improve the instruction and demonstrations to address the feedback.
+You may add or remove demonstrations when useful.
+Prompt: {{ candidate.model_dump() | tojson }}
+Feedback: {{ feedback }}
+Return JSON matching {{ schema | tojson }}.

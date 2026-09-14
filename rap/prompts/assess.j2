@@ -1,0 +1,14 @@
+Assess whether the proposed action is valid and useful from this state toward
+satisfying the task. Estimate its helpfulness from 0 (invalid or useless) to 1
+(correct and useful). Judge this local step without simulating a complete path.
+
+<task>{{ instance.task }}</task>
+<action_contract>{{ instance.actions }}</action_contract>
+<world_contract>{{ instance.world }}</world_contract>
+<criteria>{{ instance.criteria }}</criteria>
+<state>{{ state.model_dump() | tojson }}</state>
+<action>{{ action }}</action>
+
+# Output Format
+Return only JSON matching this schema:
+{{ schema | tojson }}

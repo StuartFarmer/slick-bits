@@ -1,0 +1,8 @@
+Infer the instruction that produced these input-output demonstrations.
+Task context: {{ instance.task }}
+
+{% for example in demonstrations %}
+{{ example }}
+{% endfor %}
+
+Return only the instruction, without explanation or quotation marks.

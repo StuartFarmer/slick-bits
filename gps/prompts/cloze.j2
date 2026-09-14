@@ -1,0 +1,8 @@
+Fill the masked words in this instruction with fluent alternatives for the task.
+Task context: {{ instance.task }}
+Masked instruction: {{ masked }}
+
+Return only T5-style sentinel fills, starting with <extra_id_0>, followed by its
+replacement text, then the next sentinel and its replacement. Use each sentinel in
+order and finish with <extra_id_{{ sentinel_count }}> and no following text.
+Every replacement must be nonempty. Do not include unmasked text or new template tags.

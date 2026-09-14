@@ -1,0 +1,4 @@
+Task: {{ instance.task }}
+Selected prompts: {{ prompts | tojson }}
+Generate {{ count }} distinct modification suggestions that can improve these prompts
+and produce diverse useful task responses. Return JSON matching {{ schema | tojson }}.

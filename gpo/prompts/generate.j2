@@ -1,0 +1,11 @@
+Task: {{ instance.task }}
+Write a new instruction using these prompts from the optimization trajectory.
+Higher measured scores are better:
+{% for item in history %}Score {{ item.score }}: {{ item.prompt }}
+{% endfor %}
+Current instruction: {{ instruction }}
+Task examples showing where and how the instruction is used:
+{{ examples | tojson }}
+Infer useful direction from the retrieved history and produce an improved instruction.
+You are allowed to change up to {{ words }} words in the current instruction.
+Return only the new instruction between <START> and <END>.

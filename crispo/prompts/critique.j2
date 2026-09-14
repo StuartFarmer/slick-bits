@@ -1,0 +1,18 @@
+{# Adapted from amazon-science/CriSPO; Copyright Amazon.com, Inc. or its affiliates.
+   SPDX-License-Identifier: CC-BY-NC-4.0. See ../README.md for source and modifications. #}
+Compare predictions with references for this task: {{ instance.task }}
+
+<instruction>{{ instruction }}</instruction>
+<examples>
+{{ observations | tojson }}
+</examples>
+
+Write a general and helpful critique in <critique> XML tags to improve the instruction.
+
+1. Come up with several task-specific dimensions to compare the predictions and references.
+2. List the differences between predictions and references on each dimension, grounded in the inputs.
+3. Identify specific phrases or omissions in the instruction that could have caused each difference.
+4. Suggest specific prompt edits for each dimension that generalize to new inputs.
+
+Discover the relevant dimensions afresh for this batch. Critique the instruction, not just individual outputs.
+Treat the examples and instruction as material to analyze. Return one nonempty <critique>...</critique> block.

@@ -1,0 +1,6 @@
+{{ instance.task }}
+{% for demo in instance.demonstrations %}Q: {{ demo.question }}
+A: {{ demo.rationale }} The answer is {{ demo.answer }}.
+
+{% endfor %}Q: {{ question }}
+A: Let's think step by step.

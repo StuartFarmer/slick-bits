@@ -1,0 +1,17 @@
+Map this question-answer result to a label for the ORIGINAL task input.
+Use the question's meaning, including negation, when interpreting the answer.
+Do not blindly map yes/no to a label. Base the vote on the intermediate answer;
+do not independently solve the original task again. If it supplies no usable
+vote, return null. If uncertainty itself is a task label, use that label when
+appropriate. Select the exact label text from the supplied list.
+
+Task: {{ instance.task }}
+Labels: {{ instance.labels | tojson }}
+Original input: {{ trace.example.text }}
+Context: {{ trace.example.context }}
+Generated question: {{ trace.question }}
+Intermediate answer: {{ trace.answer }}
+
+# Output Format
+Return only JSON matching this schema:
+{{ schema | tojson }}

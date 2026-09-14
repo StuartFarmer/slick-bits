@@ -1,0 +1,7 @@
+Task: {{ instance.task }}
+The following questions have measured numerical answers.
+{% for example in examples %}Q: Given {{ example.candidate }}, what is the task outcome?
+A: {{ example.value }}###
+{% endfor %}
+Q: Given {{ candidate }}, what is the task outcome?
+A: Return only a numeric answer followed by ###.

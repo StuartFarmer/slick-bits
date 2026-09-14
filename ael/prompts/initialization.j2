@@ -1,11 +1,14 @@
-Develop a candidate for this task:
+Develop a reusable algorithm for this task:
 <task>{{ instance.task }}</task>
 
 Create a fresh strategy. Prioritize useful diversity and explain the central idea.
+The algorithm must work across task instances, not encode one instance's answer.
 
 {{ instance.score_direction }} fitness is better.
-Return a concise description and complete candidate content appropriate to the
-task. Do not claim that the candidate was evaluated.
+Return a concise algorithm description and its complete implementation in content.
+Follow the task's entry point, inputs, outputs, and constraints exactly. Use the
+representation specified by the task; do not assume a particular programming language.
+Do not claim that the algorithm was evaluated or add commentary outside the response.
 # Output Format
 Return only JSON matching this schema:
 {{ schema | tojson }}

@@ -1,0 +1,37 @@
+[
+  {
+    "id": "cot",
+    "name": "Chain-of-Thoughts",
+    "description": "Decompose a problem into a coherent sequence of intermediate steps leading to a solution."
+  },
+  {
+    "id": "tot",
+    "name": "Tree-of-Thoughts",
+    "description": "Explore alternative reasoning paths and evaluate which is most promising. This implementation samples complete strategy-and-answer candidates and selects one by model vote."
+  },
+  {
+    "id": "analogical",
+    "name": "Analogical Prompting",
+    "description": "Generate relevant solved examples to guide the solution of a new problem through analogy."
+  },
+  {
+    "id": "self_refine",
+    "name": "Self-Refine",
+    "description": "Generate an initial solution, then inspect it for errors and improve it using the same model's feedback."
+  },
+  {
+    "id": "spp",
+    "name": "Solo Performance Prompting",
+    "description": "Simulate collaborating personas with complementary expertise or needs. Use their critiques and suggestions to develop a solution within one model response."
+  },
+  {
+    "id": "step_back",
+    "name": "Step-Back Prompting",
+    "description": "First identify high-level concepts and principles behind the problem, then use them to guide the specific solution."
+  },
+  {
+    "id": "simtom",
+    "name": "SimToM",
+    "description": "Identify information available from the relevant perspective, then answer using that information. For general tasks, establish relevant known facts and knowledge limits before solving."
+  }
+]

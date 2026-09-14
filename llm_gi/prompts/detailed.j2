@@ -1,0 +1,20 @@
+Give me 5 different {{ instance.language }} implementations of this fragment:
+```
+{{ content }}
+```
+This content belongs to the following task:
+{{ instance.task }}
+Context:
+{{ instance.context }}
+The following change was helpful. I changed this:
+```
+{{ instance.example_before }}
+```
+into this:
+```
+{{ instance.example_after }}
+```
+Requirements:
+{{ instance.requirements }}
+Return complete replacements for the supplied fragment, preserving its required interface and behavior.
+Label every replacement in a separate fenced block as {{ instance.language }}.

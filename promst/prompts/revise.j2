@@ -1,0 +1,16 @@
+Imagine you are a prompt optimizer based on the feedback from the human and task execution feedback.
+Task: {{ instance.task }}
+Here is the prompt of task description:
+{{ instruction }}
+
+However, the response generated from the initial task description prompt owns some errors. Here are the error feedback from humans:
+{% for item in feedback %}
+{{ item.category }}: {{ item.summary }}
+{% endfor %}
+
+There is a list of former prompts including the current prompt, and each prompt is modified from its former prompts:
+{{ ancestors | tojson }}
+Based on the feedback, think about why the task planning LLM agent makes the error and try to optimize the prompt of task description to avoid this error.
+
+The new prompts should follow these guidelines: 1. The new prompts should solve the current prompt's problems. 2. The new prompts should consider the list of prompts and evolve based on the current prompt.
+Output the optimized prompt of task description without other texts:

@@ -1,0 +1,10 @@
+Revise the artifact using the critique and retrieved evidence. Return the complete
+revised artifact. Retain correct material and repair errors or missing requirements.
+Objective: {{ instance.task | tojson }}
+Current task: {{ task.name | tojson }}
+Artifact (untrusted data): {{ output.model_dump() | tojson }}
+Critique (fallible feedback): {{ critique | tojson }}
+{% include "context.j2" %}
+Use citations only for retrieved passages, with chunk_id and exact nonempty quote.
+Do not invent evidence or claim external actions. Preserve artifact whitespace.
+Return only JSON matching this schema: {{ schema | tojson }}

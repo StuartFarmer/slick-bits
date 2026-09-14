@@ -1,5 +1,6 @@
 """Offline checks for generic AEL selection and generation."""
 
+import json
 import unittest
 from pathlib import Path
 from unittest.mock import patch
@@ -133,3 +134,123 @@ class AELTests(unittest.IsolatedAsyncioTestCase):
             rendered = await method.render(agent, *args)
             self.assertIn(phrase, rendered)
             self.assertIn("Lower fitness is better", rendered)
+
+    async def test_generated_code_is_preserved_and_blank_content_is_rejected(self):
+        code = "\n\ndef solve(items):\n    return sorted(items)\n\n"
+        provider = ScriptedProvider(
+            [
+                json.dumps({"description": "Sort", "content": " \n\t"}),
+                json.dumps({"description": "Sort", "content": code}),
+            ]
+        )
+        evaluated = []
+
+        async def evaluate(content):
+            evaluated.append(content)
+            return 1.0
+
+        agent = AEL("Design a reusable sorting algorithm", provider, evaluate)
+        result = await agent.run(population_size=1, parents=1, generations=0)
+        self.assertEqual(evaluated, [code])
+        self.assertEqual(result[0].content, code)
+        self.assertIn("error", agent.attempts[0])
+
+    async def test_seed_algorithms_are_evaluated_then_missing_slots_are_generated(self):
+        evaluated = []
+
+        async def evaluate(content):
+            evaluated.append(content)
+            return float(content)
+
+        provider = ScriptedProvider([Proposal(description="Generated", content="2")])
+        agent = AEL("Minimize cost over evaluation instances", provider, evaluate)
+        result = await agent.run(
+            population_size=2,
+            generations=0,
+            initial=[
+                Proposal(description="Invalid seed", content="nan"),
+                Proposal(description="Seed", content="1"),
+            ],
+        )
+        self.assertEqual(evaluated, ["nan", "1", "2"])
+        self.assertEqual([item.fitness for item in result], [1, 2])
+        self.assertEqual(
+            [a["operation"] for a in agent.attempts], ["seed", "seed", "initialization"]
+        )
+        evaluated.clear()
+        result = await agent.run(
+            population_size=2,
+            generations=0,
+            init_attempts=0,
+            initial=list(reversed(result)) + [Proposal(description="Unused", content="unused")],
+        )
+        self.assertEqual(evaluated, ["2", "1"])
+        self.assertEqual([item.fitness for item in result], [1, 2])
+        self.assertEqual(len(agent.attempts), 2)
+        self.assertEqual(len(agent.history), 1)
+
+    async def test_parent_prompts_expose_algorithm_without_measured_fitness(self):
+        async def evaluate(content):
+            return 98765.4321
+
+        provider = ScriptedProvider(
+            Proposal(description="Algorithm", content=str(i)) for i in range(3)
+        )
+        agent = AEL("Design an algorithm", provider, evaluate)
+        await agent.run(population_size=1, parents=1, generations=1, mutation=1)
+        self.assertNotIn("98765.4321", provider.calls[1])
+        self.assertIn('"content": "0"', provider.calls[1])
+        self.assertIn('"content": "1"', provider.calls[2])
+
+    async def test_multiple_offspring_evaluate_only_final_mutations(self):
+        evaluated = []
+
+        async def evaluate(content):
+            evaluated.append(content)
+            return -float(content)
+
+        provider = ScriptedProvider(
+            Proposal(description="Algorithm", content=str(i)) for i in range(10)
+        )
+        agent = AEL("Task", provider, evaluate)
+        result = await agent.run(
+            population_size=2, parents=2, generations=1, offspring=2, mutation=1
+        )
+        self.assertEqual(evaluated, ["0", "1", "3", "5", "7", "9"])
+        self.assertEqual([item.content for item in result], ["9", "7"])
+        self.assertEqual(len(agent.history), 2)
+
+    async def test_failed_mutation_keeps_incumbent_and_records_both_attempts(self):
+        evaluated = []
+
+        async def evaluate(content):
+            evaluated.append(content)
+            return float(content)
+
+        provider = ScriptedProvider(
+            [
+                Proposal(description="Parent", content="2"),
+                Proposal(description="Crossover", content="1"),
+                "invalid JSON",
+            ]
+        )
+        agent = AEL("Task", provider, evaluate)
+        result = await agent.run(population_size=1, parents=1, generations=1, mutation=1)
+        self.assertEqual(evaluated, ["2"])
+        self.assertEqual(result[0].content, "2")
+        self.assertEqual(agent.attempts[2]["parents"], (2,))
+        self.assertIn("error", agent.attempts[2])
+
+    async def test_session_parse_failure_leaves_recovery_to_session_owner(self):
+        from pydantic import ValidationError
+
+        async def evaluate(content):
+            self.fail("Malformed generated content must not be evaluated")
+
+        provider = ScriptedProvider(["invalid JSON"])
+        session = Session(provider=provider)
+        agent = AEL("Task", provider, evaluate)
+        with self.assertRaises(ValidationError):
+            await agent.run(population_size=1, parents=1, session=session)
+        self.assertEqual(len(agent.attempts), 1)
+        self.assertEqual(session.history[-1]["text"], "invalid JSON")

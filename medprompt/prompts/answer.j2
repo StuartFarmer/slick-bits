@@ -1,0 +1,10 @@
+{{ instance.task }}
+Explain your reasoning and finish with Answer: [A], using the correct choice letter.
+{% for item in demonstrations %}## Question
+{{ item.question }}
+## Answer
+{{ item.answer }}
+
+{% endfor %}## Question
+{{ description }}
+## Answer

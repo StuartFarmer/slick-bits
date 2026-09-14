@@ -1,0 +1,4 @@
+Produce a {{ instance.representation }} for this task: {{ instance.task }}.
+Make it consistent with the user's answers, including exceptions and edge cases.
+Questions and answers: {{ history | tojson }}
+Return the hypothesis in JSON matching {{ schema | tojson }}.

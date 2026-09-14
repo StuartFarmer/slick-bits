@@ -1,0 +1,5 @@
+Task: {{ instance.task }}
+Current instruction: {{ instruction }}
+Failure explanations: {{ reasons | tojson }}
+Find common reasons across these cases and construct a distinct improved instruction.
+Generalize beyond the individual answers. Return only the full instruction.

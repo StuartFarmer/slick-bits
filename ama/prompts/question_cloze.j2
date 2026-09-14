@@ -1,0 +1,15 @@
+Reformulate the input as a fill-in-the-blank question that helps resolve
+the task. Mark the missing answer with ___. Generate only the question.
+
+Task: {{ instance.task }}
+
+Input: Jack camped with Mark.
+Question: Jack camped with ___.
+
+Input: The train arrived at noon.
+Question: The train arrived at ___.
+
+{{ chain.question_examples }}
+
+Input: {{ example.text }}
+Question:

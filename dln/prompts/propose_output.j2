@@ -1,0 +1,11 @@
+Improve the output-layer instruction using the observed program executions.
+Task: {{ instance.task }}
+Current instruction: {{ instruction }}
+{% for example in examples %}
+Input: {{ example.input }}
+Intermediate text: {{ example.hidden }}
+Output: {{ example.output }}
+Target: {{ example.target }}
+Loss: {{ example.loss }}
+{% endfor %}
+Return only a revised output-layer instruction.

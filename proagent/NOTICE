@@ -1,0 +1,21 @@
+Adapted from the official implementation of:
+ProAgent: Building Proactive Cooperative Agents with Large Language Models
+Zhang et al., AAAI 2024, https://arxiv.org/abs/2308.11339
+
+Repository: https://github.com/PKU-Alignment/ProAgent
+Revision: 8aa0e6563b368d2220e0ac3fff44d0d971b5715b
+Copyright (c) 2023 CeyaoZhang
+MIT license reproduced in LICENSE.
+
+Sources used:
+- src/proagent/proagent.py: action, generate_ml_action,
+  generate_belief_prompt, generate_failure_feedback, and validation/controller flow.
+- src/proagent/modules.py: get_cache and knowledge/history prompt composition.
+- src/prompts/gpt/planner/l3-aip/cramped_room_0.txt: cooperative planning sequence.
+- src/prompts/gpt/explainer/player0.txt: precondition-based failure explanation.
+
+Modifications: task-independent state, skills, verification and controller callbacks;
+async Slick generation with typed plan output; local Jinja templates; explicit
+attempt budgets; observation events with timestamps; retained raw responses;
+bounded replanning without Overcooked-specific wait/random-movement fallback.
+This is an adaptation of the algorithm, not a drop-in Overcooked implementation.

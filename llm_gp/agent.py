@@ -5,10 +5,17 @@ import random
 from collections.abc import Awaitable, Callable
 from typing import Annotated, Literal
 
-from pydantic import BaseModel, Field, StrictInt, StringConstraints, ValidationError
+from pydantic import AfterValidator, BaseModel, Field, StrictInt, ValidationError
 from slick import Session, prompt
 
-Text = Annotated[str, StringConstraints(strip_whitespace=True, min_length=1)]
+
+def _nonblank(content: str) -> str:
+    if not content.strip():
+        raise ValueError("candidate content must not be blank")
+    return content
+
+
+Text = Annotated[str, Field(min_length=1), AfterValidator(_nonblank)]
 
 
 class Proposal(BaseModel, extra="forbid"):
@@ -169,7 +176,11 @@ class LLMGP:
         if self.variant == "llm-gp":
             parents = await self._generate(self.select_parents, self.population, session=session)
             return parents or self.rng.choices(self.population, k=2)
-        return [min(self.rng.choices(self.population, k=2), key=self._rank) for _ in range(2)]
+        # Upstream tournaments draw distinct competitors; winners may repeat.
+        return [
+            min(self.rng.sample(self.population, min(2, len(self.population))), key=self._rank)
+            for _ in range(2)
+        ]
 
     async def _vary_parents(self, parents, session):
         children = [parent.content for parent in parents]
@@ -189,8 +200,6 @@ class LLMGP:
 
     async def _evolve_population(self, session):
         self.pending = []
-        if self.variant == "llm-gp-mu-xo":
-            await self._add_candidate(min(self.population, key=self._rank).content)
         while len(self.pending) < self.population_size:
             parents = await self._choose_parents(session)
             await self._vary_parents(parents, session)
@@ -200,6 +209,10 @@ class LLMGP:
                 await self._generate(self.replace_population, pool, session=session)
                 or sorted(pool, key=self._rank)[: self.population_size]
             )
+        else:
+            # Tutorial_GP-LLM evaluates n offspring, then adds the old elite and truncates.
+            pool = self.pending + [min(self.population, key=self._rank)]
+            self.pending = sorted(pool, key=self._rank)[: self.population_size]
 
     def _keep_generation(self):
         self.population = self.pending

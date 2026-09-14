@@ -1,0 +1,14 @@
+Compare these candidate solutions against the task. Select the most promising
+complete strategy and answer, considering correctness and all requirements.
+The choice indices are zero-based; select exactly one supplied index.
+
+{% include "task.j2" %}
+
+{% for choice in choices %}
+Choice {{ loop.index0 }}:
+{{ choice }}
+{% endfor %}
+
+# Output Format
+Return only JSON matching this schema:
+{{ schema | tojson }}

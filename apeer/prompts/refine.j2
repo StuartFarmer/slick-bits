@@ -1,0 +1,6 @@
+Task: {{ instance.task }}
+Current instruction: {{ instruction }}
+Feedback from training cases:
+{{ feedbacks | tojson }}
+Refine the instruction using this feedback. Preserve the task and output contract.
+Return only the full revised instruction.

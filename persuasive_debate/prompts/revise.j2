@@ -1,0 +1,11 @@
+{% include "expert.j2" %}
+
+<previous_argument>{{ argument }}</previous_argument>
+<critique>{{ critique }}</critique>
+
+Rewrite your argument to strengthen support for "{{ view.answers[0] }}".
+Correct inaccurate quotes to match the evidence and put every direct quote in
+<quote> tags. Choose the most useful suggestions that fit the word limit.
+You need not implement feedback that would undermine your assigned answer.
+Do not mention the critique or this revision process in the public argument.
+Return the complete revised argument inside <argument></argument> tags.

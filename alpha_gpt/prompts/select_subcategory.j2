@@ -1,0 +1,14 @@
+Choose one promising subcategory within the selected high-level category.
+Task: {{ instance.task }}
+High-level category: {{ category }}
+Successful reference candidates:
+{% for document in memory %}
+{{ document.id }}: {{ document.text }}
+{% endfor %}
+Available subcategories (choose one exact ID):
+{% for document in options %}
+{{ document.id }}: {{ document.text }}
+{% endfor %}
+
+# Output Format
+Return only JSON matching {{ schema | tojson }}.

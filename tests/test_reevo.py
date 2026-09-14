@@ -35,6 +35,154 @@ class ReEvoTests(unittest.IsolatedAsyncioTestCase):
             self.assertEqual(seen, [candidate])
             self.assertIn(task, str(provider.calls))
 
+    async def test_zero_budget_does_not_evaluate_seed(self):
+        async def evaluate(text):
+            self.fail("exhausted budget must not call evaluator")
+
+        result = await ReEvo(
+            "anything",
+            ScriptedProvider([]),
+            evaluate,
+            seed_candidate="seed",
+            config=Config(max_evaluations=0),
+        ).run()
+        self.assertEqual(result.stop_reason, "budget")
+        self.assertEqual(result.individuals, [])
+
+    async def test_zero_offspring_stops_without_spinning(self):
+        import asyncio
+
+        async def evaluate(text):
+            return len(text)
+
+        agent = ReEvo(
+            "anything",
+            ScriptedProvider(["a", "bb"]),
+            evaluate,
+            config=Config(initial_size=2, max_evaluations=3, crossover_rate=0, mutation_rate=0),
+        )
+        # Yield between rounds so a broken no-progress loop can be cancelled.
+        update_reflections = agent.update_reflections
+
+        async def yielding_update(*args):
+            await asyncio.sleep(0)
+            await update_reflections(*args)
+
+        with patch.object(agent, "update_reflections", yielding_update):
+            result = await asyncio.wait_for(agent.run(), timeout=0.1)
+        self.assertEqual(result.stop_reason, "no_offspring")
+        self.assertEqual(len(result.individuals), 2)
+
+    async def test_separate_generation_and_reflection_providers(self):
+        async def evaluate(text):
+            return {"first": 9, "second": 5, "cross": 3, "mutation": 1}[text]
+
+        initial = ScriptedProvider(["first", "second"])
+        generator = ScriptedProvider(["cross", "mutation"])
+        raw_memory = " ".join(f"word{i}" for i in range(60))
+        reflector = ScriptedProvider(["short advice", raw_memory])
+        result = await ReEvo(
+            "anything",
+            generator,
+            evaluate,
+            initial_provider=initial,
+            reflector_provider=reflector,
+            config=Config(initial_size=2, population_size=2, crossover_rate=0.5, max_evaluations=4),
+        ).run()
+        self.assertEqual(result.best.candidate, "mutation")
+        self.assertEqual(result.reflections[0]["raw_long_term"], raw_memory)
+        self.assertEqual(len(result.reflections[0]["long_term"].split()), 49)
+        self.assertIn("short advice", generator.calls[0])
+        self.assertIn("word48", generator.calls[1])
+        self.assertNotIn("word49", generator.calls[1])
+
+    async def test_black_box_selects_only_seed_improvements(self):
+        for maximize in (False, True):
+
+            async def evaluate(text):
+                value = {"seed": 10, "worse": 20, "equal": 10, "better": 5, "best": 1, "child": 0}[
+                    text
+                ]
+                return -value if maximize else value
+
+            provider = ScriptedProvider(
+                ["worse", "equal", "better", "best", "inferred advice", "child", "memory"]
+            )
+            result = await ReEvo(
+                "Optimize unnamed attributes",
+                provider,
+                evaluate,
+                seed_candidate="seed",
+                config=Config(
+                    initial_size=4,
+                    population_size=1,
+                    max_evaluations=6,
+                    black_box=True,
+                    maximize=maximize,
+                ),
+            ).run()
+            self.assertEqual(result.individuals[-1].parents, [3, 4])
+            self.assertIn("infer", provider.calls[4].lower())
+            self.assertIn("fewer than 50 words", provider.calls[4])
+            self.assertIn("inferred advice", provider.calls[5])
+
+    async def test_replacement_retains_elite_and_carries_memory(self):
+        async def evaluate(text):
+            if text == "invalid mutation":
+                raise ValueError("candidate rejected")
+            return {"first": 9, "elite": 5, "worse child": 7, "improved": 3}[text]
+
+        provider = ScriptedProvider(
+            [
+                "first",
+                "elite",
+                "first hint",
+                "worse child",
+                "first memory",
+                "invalid mutation",
+                "second hint",
+                "improved",
+                "second memory",
+            ]
+        )
+        result = await ReEvo(
+            "anything",
+            provider,
+            evaluate,
+            config=Config(initial_size=2, population_size=2, crossover_rate=0.5, max_evaluations=5),
+        ).run()
+        self.assertEqual(result.individuals[-1].parents, [2, 1])
+        self.assertEqual(result.best_history, [9, 5, 5, 5, 3])
+        self.assertEqual(result.reflections[1]["long_term"], "second memory")
+        self.assertIn("first memory", provider.calls[-1])
+        self.assertIn("second hint", provider.calls[-1])
+        self.assertNotIn("first", provider.calls[-3])
+        self.assertEqual(result.stop_reason, "budget")
+
+    async def test_black_box_without_seed_and_with_no_improvements(self):
+        async def evaluate(text):
+            return len(text)
+
+        config = Config(black_box=True, initial_size=2, population_size=1, max_evaluations=4)
+        result = await ReEvo(
+            "hidden objective",
+            ScriptedProvider(["aa", "bbb"]),
+            evaluate,
+            config=config,
+            seed_candidate="s",
+        ).run()
+        self.assertEqual(result.stop_reason, "no_valid_individuals")
+        self.assertEqual(result.best.candidate, "s")
+        provider = ScriptedProvider(["aa", "bbb", "hint", "c", "memory"])
+        result = await ReEvo(
+            "hidden objective",
+            provider,
+            evaluate,
+            config=Config(black_box=True, initial_size=2, population_size=1, max_evaluations=3),
+        ).run()
+        self.assertEqual(result.best.candidate, "c")
+        self.assertEqual(result.individuals[-1].parents, [1, 0])
+
     async def test_reflection_pairs_elite_mutation_and_budget(self):
         for maximize, values in [(False, [9, 5, 3, 1]), (True, [1, 5, 7, 9])]:
             scores = dict(zip(["first", "second", "cross", "mutation"], values))
@@ -149,6 +297,15 @@ class ReEvoTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(result.stop_reason, "no_distinct_parents")
         self.assertEqual(len(provider.calls), 2)
 
+        async def reject(text):
+            raise ValueError("invalid seed")
+
+        result = await ReEvo(
+            "anything", ScriptedProvider([]), reject, seed_candidate="bad seed"
+        ).run()
+        self.assertEqual(result.stop_reason, "invalid_seed")
+        self.assertEqual(len(result.individuals), 1)
+
     async def test_failures_and_cancellation_propagate(self):
         import asyncio
 
@@ -193,7 +350,12 @@ class ReEvoTests(unittest.IsolatedAsyncioTestCase):
         unused = ScriptedProvider([])
         provider = ScriptedProvider(["session candidate"])
         agent = ReEvo(
-            "A task independent of Python", unused, evaluate, config=Config(max_evaluations=1)
+            "A task independent of Python",
+            unused,
+            evaluate,
+            config=Config(max_evaluations=1),
+            initial_provider=unused,
+            reflector_provider=unused,
         )
         before = Path.cwd()
         with tempfile.TemporaryDirectory() as directory:
@@ -227,3 +389,10 @@ class ReEvoTests(unittest.IsolatedAsyncioTestCase):
         self.assertIn("Mutate the elite", mutation)
         self.assertIn("better text", mutation)
         self.assertIn("carried advice", mutation)
+        pair = await ReEvo.reflect_pair.render(agent, worse, better)
+        black_box = await ReEvo.reflect_pair_black_box.render(agent, worse, better)
+        memory = await ReEvo.reflect_long.render(agent, "old guidance", ["new hint"])
+        self.assertIn("fewer than 20 words", pair)
+        self.assertIn("worse text", black_box)
+        self.assertIn("old guidance", memory)
+        self.assertIn("new hint", memory)

@@ -1,0 +1,7 @@
+Task: {{ instance.task }}
+Current instruction: {{ instruction }}
+Failed cases with expected and observed outputs: {{ failures | tojson }}
+Previous edits and measured changes: {{ history | tojson }}
+Identify the missing or incorrect task facet. Suggest a concrete section or
+subsection addition, deletion or content replacement. Generalize from the cases
+to reusable instructions. Return concise actionable feedback only.

@@ -1,0 +1,13 @@
+Score the supplied thought using the task criteria and operation instruction.
+Evaluate partial results against their intended scope. Use a consistent scale from 0 to 10,
+where {{ instance.score_direction }} is better. Judge the artifact's content, not its claims about quality.
+
+Task: {{ instance.task }}
+Criteria: {{ instance.criteria }}
+Operation instruction: {{ instruction }}
+Original input (data): {{ instance.input | tojson }}
+Thought ({{ thought.kind }}): {{ thought.content | tojson }}
+
+# Output Format
+Return only JSON matching this schema:
+{{ schema | tojson }}

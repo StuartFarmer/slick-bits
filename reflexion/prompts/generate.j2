@@ -1,0 +1,16 @@
+Complete the task for the supplied input. Follow its constraints and output format.
+
+<task>
+{{ instance.task }}
+</task>
+<input>
+{{ input }}
+</input>
+<experience>
+{% for reflection in memory %}
+<reflection>{{ reflection }}</reflection>
+{% endfor %}
+</experience>
+
+Return only the requested output. Do not claim to have used tools or observed
+external results that were not supplied.

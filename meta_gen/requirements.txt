@@ -1,0 +1,2 @@
+# Official implementation pinned to the source inspected for this adaptation.
+pymetagen-datalabupo @ git+https://github.com/Data-Science-Big-Data-Research-Lab/MetaGen.git@74f104e991cf7f307999adc47786722c15b04700

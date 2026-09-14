@@ -1,0 +1,10 @@
+Explain why the selected skill cannot be executed in the current state.
+{% include "knowledge.j2" %}
+
+Rejected skill and authoritative feedback:
+{{ failed | tojson }}
+
+Check its stated preconditions against the observation and identify the failed
+condition. Give a concise explanation and a useful correction for the planner.
+Do not override the verifier, invent state facts, or execute any action.
+Return plain text.

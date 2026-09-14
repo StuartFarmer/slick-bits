@@ -1,0 +1,6 @@
+Task: {{ instance.task }}
+Select and recombine at most two examples from the parents, preserving their exact text.
+Objectives to maximize: {{ instance.objectives | tojson }}
+First examples: {{ first.instruction.examples | tojson }}; scores: {{ first.scores | tojson }}
+Second examples: {{ second.instruction.examples | tojson }}; scores: {{ second.scores | tojson }}
+Return JSON matching {{ schema | tojson }}.

@@ -61,7 +61,8 @@ class APEXTests(unittest.IsolatedAsyncioTestCase):
 
         agent = APEX("Preserve the interface.", provider, evaluate, encode)
         result = await agent.run(
-            "Initial.", config=Config(iterations=5, random_probability=1, guided_mutation=False)
+            Document.split("Initial."),
+            config=Config(iterations=5, random_probability=1, guided_mutation=False),
         )
         self.assertEqual(evaluated, ["Initial."])
         self.assertEqual([step["after"] for step in result["history"]], outputs)
@@ -78,7 +79,9 @@ class APEXTests(unittest.IsolatedAsyncioTestCase):
 
         agent = APEX("Explain composting.", default, evaluate, encode)
         session = Session(provider=supplied)
-        result = await agent.run("Start.", config=Config(iterations=2), session=session)
+        result = await agent.run(
+            Document.split("Start."), config=Config(iterations=2), session=session
+        )
         self.assertEqual(result["best"]["prompt"], "Best expanded sentence.")
         self.assertEqual(default.calls, [])
         self.assertEqual(len(supplied.calls), 2)
@@ -100,7 +103,7 @@ class APEXTests(unittest.IsolatedAsyncioTestCase):
 
         agent = APEX("Task.", provider, evaluate, encode)
         with self.assertRaisesRegex(ValueError, "non-finite"):
-            await agent.run("Initial.", config=Config(iterations=0))
+            await agent.run(Document.split("Initial."), config=Config(iterations=0))
         self.assertEqual(provider.calls, [])
 
         async def finite(text):
@@ -109,7 +112,7 @@ class APEXTests(unittest.IsolatedAsyncioTestCase):
         failing = ScriptedProvider([RuntimeError("transport failed")])
         with self.assertRaisesRegex(RuntimeError, "transport failed"):
             await APEX("Task.", failing, finite, encode).run(
-                "Initial.", config=Config(iterations=1)
+                Document.split("Initial."), config=Config(iterations=1)
             )
         self.assertEqual(len(failing.calls), 1)
 
@@ -122,11 +125,64 @@ class APEXTests(unittest.IsolatedAsyncioTestCase):
             return len(text)
 
         agent = APEX("Expand instructions.", provider, evaluate, encode)
-        first = await agent.run("Start.", config=Config(iterations=1))
-        second = await agent.run("Start.", config=Config(iterations=1))
+        first = await agent.run(Document.split("Start."), config=Config(iterations=1))
+        second = await agent.run(Document.split("Start."), config=Config(iterations=1))
         self.assertEqual(first, second)
         self.assertIsNot(first["history"], second["history"])
         self.assertEqual(evaluated, ["Start.", "Longer sentence."] * 2)
+
+    async def test_immutable_document_returns_initial_without_generation(self):
+        provider = ScriptedProvider([])
+
+        async def evaluate(text):
+            return 1.0
+
+        result = await APEX("Any task.", provider, evaluate, encode).run(
+            Document(("Keep exactly this.",), ())
+        )
+        self.assertEqual(result["best"], {"prompt": "Keep exactly this.", "score": 1.0})
+        self.assertEqual(result["evaluations"], 1)
+        self.assertEqual(result["history"], [])
+        self.assertEqual(provider.calls, [])
+
+    async def test_beam_retains_alternatives_and_stable_ties(self):
+        provider = ScriptedProvider(["Better.", "Alternative.", "Best.", "Tied."])
+        scores = {"Start.": 0, "Better.": 2, "Alternative.": 1, "Best.": 3, "Tied.": 2}
+
+        async def evaluate(text):
+            return scores[text]
+
+        result = await APEX("Any task.", provider, evaluate, encode).run(
+            Document.split("Start."), config=Config(iterations=4, beam_size=2, seed=0)
+        )
+        self.assertEqual(
+            result["beam"], [{"prompt": "Best.", "score": 3}, {"prompt": "Better.", "score": 2}]
+        )
+        for entry in result["history"]:
+            self.assertEqual(entry["reward"], scores[entry["after"]] - scores[entry["before"]])
+        self.assertEqual(result["evaluations"], 5)
+
+    def test_history_uses_before_similarity_and_only_nearest_nonzero_rewards(self):
+        vectors = {
+            "query": [1.0, 0.0],
+            "close": [0.99, 0.1],
+            "far": [0.0, 1.0],
+            "near": [0.98, 0.2],
+        }
+        embeddings = Embeddings(lambda texts: [vectors[text] for text in texts])
+        feature = embeddings(["query"])[0]
+        history = [
+            dict(before="query", after="ignored", reward=0),
+            dict(before="near", after="improved", reward=1),
+            dict(before="far", after="query", reward=-1),
+            dict(before="close", after="worse", reward=-1),
+        ]
+        self.assertEqual(retrieve(feature, history, embeddings, 1, 0.5), [("worse", "close")])
+        self.assertEqual(
+            retrieve(feature, history, embeddings, 4, 0.5),
+            [("worse", "close"), ("near", "improved")],
+        )
+        self.assertEqual(retrieve(feature, history, embeddings, 4, 0.0), [])
 
     def test_document_preserves_boundaries(self):
         original = (

@@ -1,0 +1,13 @@
+{% include "critic_system.j2" %}
+
+{% include "conversation.j2" %}
+
+Proposals from the AI {{ speaker }}:
+{% for proposal in proposals %}
+Option {{ loop.index }}:
+{{ proposal }}
+
+{% endfor %}
+# Output Format
+Return only JSON matching this schema. Use the one-based option number and explain your selection:
+{{ schema | tojson }}

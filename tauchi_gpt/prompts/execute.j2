@@ -1,0 +1,13 @@
+Perform the current task toward the objective. Produce the task's actual artifact.
+Do not claim to have run code, accessed external sources, or performed actions.
+Objective: {{ instance.task | tojson }}
+Current task: {{ task.name | tojson }}
+{% include "context.j2" %}
+Recent task artifacts are fallible working memory:
+{% for step in recent %}
+{{ {"task": step.task.name, "output": step.output.model_dump()} | tojson }}
+{% endfor %}
+Cite retrieved passages used for factual claims with their chunk_id and an exact
+nonempty quote. Use an empty citations list when no retrieved evidence is used.
+Separate unsupported suggestions from sourced statements. Preserve artifact whitespace.
+Return only JSON matching this schema: {{ schema | tojson }}

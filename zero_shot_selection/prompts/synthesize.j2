@@ -1,0 +1,27 @@
+When writing code, prefer NumPy vectorized operations and avoid explicit Python
+for-loops unless absolutely necessary. Please implement code within 30 lines.
+
+Develop an innovative and novel parent-selection operator in Python for this task:
+
+<task>
+{{ instance.task }}
+</task>
+
+Use this interface:
+def custom_selection(population, k=100, status={}):
+    # status["evolutionary_stage"] is in [0, 1]: first to final generation.
+    return selected_individuals
+
+The task describes the population objects and their available measurements.
+Return exactly k references to members of population, allowing repetition.
+Do not mutate the population, its members, or status. Include required imports.
+You do not need to provide a usage example.
+
+Embrace creativity, novelty, and bold experimentation to push the boundaries of
+the state of the art in selection operators for the supplied task.
+
+# Output Format
+
+Respond only with JSON matching this schema. Put executable Python, without
+Markdown fences, in source:
+{{ schema | tojson }}

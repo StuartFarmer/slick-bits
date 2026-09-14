@@ -1,0 +1,15 @@
+Rewrite the input as an open question starting with who, what, where, when,
+why, or how that helps resolve the task. Generate only the question.
+
+Task: {{ instance.task }}
+
+Statement: Max and his wife went on a trip to Europe
+Question: Where did Max and his wife go on a trip?
+
+Statement: it took jenna 7 attempts to solve the problem
+Question: How many attempts did it take Jenna to solve the problem?
+
+{{ chain.question_examples }}
+
+Input: {{ example.text }}
+Question:

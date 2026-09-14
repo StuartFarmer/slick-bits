@@ -1,0 +1,7 @@
+Summarize the hints inferred from these input-output demonstrations into concise,
+general instructions that will help solve new examples. Combine shared rules,
+resolve redundancy, and preserve useful distinctions.
+Task: {{ instance.task }}
+Current instruction: {{ instruction }}
+Demonstrations with hints: {{ hints | tojson }}
+Return only the combined hint to append to the current instruction.

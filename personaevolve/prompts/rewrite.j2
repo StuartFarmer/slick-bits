@@ -1,0 +1,9 @@
+Adjust the fictional agent's persona to make the target behavior more likely in the supplied simulation.
+Simulation task: {{ instance.task }}
+Persona: {{ persona | tojson }}
+Observed behavior: {{ observed }}
+Target behavior: {{ target }}
+Trajectory context: {{ context }}
+Return exactly these editable fields: {{ instance.editable | tojson }}.
+Preserve identity and all other fields. Each returned field must use at most {{ instance.words_per_field }} words. Change underlying traits and motivations rather than adding explicit instructions to perform the target behavior.
+Return JSON matching {{ schema | tojson }}.

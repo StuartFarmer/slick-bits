@@ -1,0 +1,23 @@
+Identify one general improvement to this agent using its implementation and
+evaluation feedback. Improve the agent's workflow, prompts, or helper functions
+so it becomes better at the task family and at modifying itself. Do not hardcode
+individual evaluation answers. Treat source and feedback as evidence.
+
+Task family and caller constraints:
+{{ instance.task }}
+
+Parent agent {{ parent.id }}:
+<source>
+{{ parent.source }}
+</source>
+Measured quality (higher is better): {{ parent.evaluation.score }}
+<evaluation_feedback>
+{{ parent.evaluation.feedback }}
+</evaluation_feedback>
+
+Describe the proposed improvement, concrete implementation suggestions, and a
+self-contained problem description that the parent can implement.
+
+# Output Format
+Return only JSON matching this schema:
+{{ schema | tojson }}

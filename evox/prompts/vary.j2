@@ -1,0 +1,12 @@
+Improve the parent using free-form variation. Choose the scope of the changes.
+Use the evaluator's feedback and complementary ideas from the inspirations.
+
+Task (objective: {{ instance.direction }} the evaluator score):
+<task>{{ instance.task }}</task>
+Parent and evaluation data:
+{{ parent | tojson }}
+Inspirations and evaluation data:
+{{ inspirations | tojson }}
+
+Return only the complete candidate artifact, preserving the task's required format.
+Do not add commentary or an extra code fence.

@@ -1,0 +1,5 @@
+# Optional: only needed for the default Python AST similarity callback.
+# This upstream revision permits Tree-sitter's capsule-compatible API.
+codebleu @ git+https://github.com/k4black/codebleu.git@b0edb622f6a52fe9d1edc407be5061d3e1462a7f
+tree-sitter==0.23.2
+tree-sitter-python==0.23.0

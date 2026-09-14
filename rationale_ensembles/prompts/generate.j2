@@ -1,0 +1,18 @@
+Solve the supplied input according to the task and demonstrated answer format.
+Give a rationale followed by "The answer is X." where X is the answer alone.
+Do not generate additional questions.
+
+<task>
+{{ instance.task }}
+</task>
+
+<examples>
+{% for example in examples %}
+Q: {{ example.input }}
+A: {{ example.rationale }} The answer is {{ example.answer }}.
+
+{% endfor %}
+</examples>
+
+Q: {{ input }}
+A:

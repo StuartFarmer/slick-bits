@@ -1,0 +1,10 @@
+Improve the first-layer instruction so it generates useful intermediate text.
+Task: {{ instance.task }}
+Current instruction: {{ instruction }}
+{% for example in examples %}
+Input: {{ example.input }}
+Original intermediate text: {{ example.hidden }}
+Desired intermediate text: {{ example.target_hidden }}
+Task loss: {{ example.loss }}
+{% endfor %}
+Return only a revised first-layer instruction.

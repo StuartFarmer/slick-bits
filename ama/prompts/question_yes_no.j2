@@ -1,0 +1,15 @@
+Rewrite the input as a yes/no question that helps resolve the task.
+Preserve negation, entities, and qualifiers. Generate only the question.
+
+Task: {{ instance.task }}
+
+Statement: most of the light comes from the sun
+Question: Does most of the light come from the sun?
+
+Statement: the balloon popped
+Question: Did the balloon pop?
+
+{{ chain.question_examples }}
+
+Input: {{ example.text }}
+Question:

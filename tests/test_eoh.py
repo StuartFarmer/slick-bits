@@ -1,12 +1,14 @@
 """Offline checks for generic evolution of heuristics."""
 
+import json
 import unittest
 from pathlib import Path
 from unittest.mock import patch
 
 from slick import Session, prompts
+from slick.providers import ProviderError
 
-from eoh import EoH, Proposal
+from eoh import CandidateRejected, EoH, Proposal
 from tests.providers import ScriptedProvider
 
 
@@ -100,7 +102,7 @@ class EoHTests(unittest.IsolatedAsyncioTestCase):
 
         def choose(population, *, weights, k):
             weights_seen.append(weights.copy())
-            return [0]
+            return [population[0]] * k
 
         async def evaluate(content):
             return float(content) if int(content) < 2 else 0.0
@@ -108,13 +110,120 @@ class EoHTests(unittest.IsolatedAsyncioTestCase):
         agent = EoH("Task", provider, evaluate, maximize=False)
         with patch("eoh.agent.random.Random.choices", side_effect=choose):
             result = await agent.run(population_size=2, parents=2, generations=1, operators=("E1",))
-        self.assertEqual(weights_seen, [[1 / 3, 1 / 4], [1 / 4]] * 2)
+        self.assertEqual(weights_seen, [[1 / 3, 1 / 4]] * 2)
         self.assertEqual([item.id for item in result], [1, 3])
-        self.assertEqual(agent.attempts[2]["parents"], (1, 2))
+        self.assertEqual(agent.attempts[2]["parents"], (1, 1))
+
+    async def test_content_is_preserved_and_raw_failures_are_logged(self):
+        content = "\n# Keep this artifact intact\ndef heuristic(x):\n    return x\n\n"
+        proposal = {"description": "Identity heuristic", "content": content}
+        raw = json.dumps(proposal)
+        provider = ScriptedProvider(["invalid JSON", raw])
+        seen = []
+
+        async def evaluate(candidate):
+            seen.append(candidate)
+            return 1.0
+
+        agent = EoH("Implement heuristic(x)", provider, evaluate)
+        result = await agent.run(population_size=1, generations=0)
+        self.assertEqual(seen, [content])
+        self.assertEqual(result[0].content, content)
+        self.assertEqual([r["raw_response"] for r in agent.attempts], ["invalid JSON", raw])
+        self.assertEqual(agent.evaluations, 1)
+
+    async def test_session_recovers_after_malformed_proposal(self):
+        session = Session(
+            provider=ScriptedProvider(["bad", Proposal(description="Idea", content="x")])
+        )
+
+        async def evaluate(content):
+            return 1.0
+
+        agent = EoH("Task", ScriptedProvider([]), evaluate)
+        result = await agent.run(population_size=1, generations=0, session=session)
+        self.assertEqual(result[0].id, 2)
+        self.assertEqual(agent.attempts[0]["raw_response"], "bad")
+        self.assertEqual(len(session.history), 2)
+
+    async def test_explicit_rejections_and_unexpected_evaluator_errors(self):
+        async def evaluate(content):
+            if content == "infeasible":
+                raise CandidateRejected("wrong interface")
+            if content == "bug":
+                raise ValueError("broken evaluator configuration")
+            return float(content)
+
+        provider = ScriptedProvider(
+            Proposal(description="Idea", content=c) for c in ("infeasible", "nan", "1", "bug")
+        )
+        agent = EoH("Task", provider, evaluate)
+        with self.assertRaisesRegex(ValueError, "broken evaluator"):
+            await agent.run(population_size=1, generations=1, operators=("M1",))
+        self.assertEqual(agent.evaluations, 4)
+        self.assertEqual(
+            [r["status"] for r in agent.attempts], ["rejected", "rejected", "accepted", "error"]
+        )
+        self.assertEqual(agent.history[0][0].fitness, 1)
+
+    async def test_small_population_supports_official_parent_sampling(self):
+        provider = ScriptedProvider(Proposal(description="Idea", content=str(i)) for i in range(3))
+
+        async def evaluate(content):
+            return float(content)
+
+        agent = EoH("Task", provider, evaluate)
+        result = await agent.run(population_size=1, generations=1, operators=("E1", "E2"))
+        self.assertEqual(result[0].fitness, 2)
+        self.assertEqual([r["parents"] for r in agent.attempts[1:]], [(1,) * 5] * 2)
+
+    async def test_generated_schema_rejections_and_evaluation_timeout(self):
+        invalid = [
+            {"description": " ", "content": "x"},
+            {"description": "Idea", "content": " \n "},
+            {"description": "Idea", "content": "x", "fitness": 999},
+        ]
+        provider = ScriptedProvider(
+            [
+                *(json.dumps(value) for value in invalid),
+                Proposal(description="Idea", content="valid"),
+                Proposal(description="Idea", content="timeout"),
+            ]
+        )
+
+        async def evaluate(content):
+            if content == "timeout":
+                raise TimeoutError("worker deadline exceeded")
+            self.assertEqual(content, "valid")
+            return 1.0
+
+        agent = EoH("Task", provider, evaluate)
+        result = await agent.run(
+            population_size=1, init_attempts=4, generations=1, operators=("M1",)
+        )
+        self.assertEqual(result[0].id, 4)
+        self.assertEqual(agent.evaluations, 2)
+        self.assertEqual(
+            [r["status"] for r in agent.attempts], ["rejected"] * 3 + ["accepted", "rejected"]
+        )
+
+    async def test_session_provider_failure_aborts_for_caller_to_resume(self):
+        good = Proposal(description="Idea", content="x")
+        provider = ScriptedProvider([good, ProviderError("offline"), good])
+        session = Session(provider=provider)
+
+        async def evaluate(content):
+            return 1.0
+
+        agent = EoH("Task", ScriptedProvider([]), evaluate)
+        with self.assertRaisesRegex(ProviderError, "offline"):
+            await agent.run(population_size=1, generations=1, operators=("M1",), session=session)
+        self.assertEqual(len(agent.attempts), 2)
+        self.assertEqual(agent.evaluations, 1)
+        self.assertEqual(agent.attempts[-1]["status"], "error")
+        self.assertEqual(await session.arun(), good.model_dump_json())
 
     async def test_provider_error_consumes_initialization_attempt(self):
-        from slick.providers import ProviderError
-
         provider = ScriptedProvider(
             [ProviderError("offline"), Proposal(description="Idea", content="one")]
         )
@@ -145,3 +254,5 @@ class EoHTests(unittest.IsolatedAsyncioTestCase):
             rendered = await method.render(agent, *args)
             self.assertIn(phrase, rendered)
             self.assertIn("Higher fitness is better", rendered)
+            self.assertIn("First", rendered)
+            self.assertIn("implementation", rendered)

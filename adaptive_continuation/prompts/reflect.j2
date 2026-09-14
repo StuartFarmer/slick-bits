@@ -1,0 +1,20 @@
+Tune the online controller's settings for the next completed-run comparison.
+Compare measured quality, validity, runtime, fallback counts, and baselines when
+those measurements are supplied. Balance decision frequency against API overhead.
+Use evidence across tasks and runs; do not claim improvement from an untested update.
+Propose a partial map of absolute new settings and a short decision note.
+Only the tunable names below may change. Integer settings must remain integers.
+
+Task: {{ instance.task }}
+Objective direction: {{ instance.direction }}
+Current settings: {{ settings | tojson }}
+Tunable settings:
+{% for name, bound in tunables.items() %}
+{{ name }}: lower={{ bound.lower }}, upper={{ bound.upper }}, integer={{ bound.integer }}, meaning={{ bound.description }}
+{% endfor %}
+Completed comparisons:
+{{ summaries | tojson }}
+
+# Output Format
+Return only JSON matching this schema:
+{{ schema | tojson }}

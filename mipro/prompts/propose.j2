@@ -1,0 +1,18 @@
+Improve the instruction for one module of this language-model program.
+Task: {{ instance.task }}
+Dataset description:
+{{ summary }}
+
+Program modules, in execution order:
+{% for stage in program %}
+{{ stage.name }}: {{ stage.instruction }}
+{% endfor %}
+
+Target module: {{ module.name }}
+Current instruction: {{ module.instruction }}
+Successful execution demonstrations for this module:
+{% for demonstration in demonstrations %}
+{{ demonstration }}
+{% endfor %}
+
+Return only a new module instruction that supports the entire program's task.

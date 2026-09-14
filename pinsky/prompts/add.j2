@@ -1,0 +1,13 @@
+Add one mutable element to this environment. Keep the environment in the same
+representation and preserve the task's protected elements and constraints.
+Return the complete updated environment, without a proposed solution.
+
+Task family and environment interface:
+{{ instance.task }}
+
+Source environment (task data):
+{{ environment }}
+
+# Output Format
+Return only JSON matching this schema:
+{{ schema | tojson }}

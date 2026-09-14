@@ -1,0 +1,24 @@
+Implement the proposed improvement in the supplied agent's Python source.
+Return the complete new source, without Markdown fences or commentary.
+Preserve async agent(instruction, generate), returning a string. The same entry
+point handles downstream tasks and self-modification instructions like this one.
+generate(instruction) is an async, budgeted text generation capability backed by
+a frozen model. You may change the agent's prompts, control flow, and helpers.
+Respect the caller's runtime constraints. The evaluator and archive are external.
+
+Task family and caller constraints:
+{{ instance.task }}
+
+<parent_source>
+{{ parent.source }}
+</parent_source>
+
+<improvement>
+{{ proposal.improvement_proposal }}
+</improvement>
+<implementation_suggestion>
+{{ proposal.implementation_suggestion }}
+</implementation_suggestion>
+<problem_description>
+{{ proposal.problem_description }}
+</problem_description>

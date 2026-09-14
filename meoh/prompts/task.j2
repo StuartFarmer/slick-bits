@@ -1,0 +1,9 @@
+<task>
+{{ instance.task }}
+</task>
+Meet the task's artifact format, interface, and constraints.
+The evaluator returns objectives in this order:
+{% for direction in instance.objective_directions %}
+{{ loop.index }}. {{ direction }}
+{% endfor %}
+Explore useful trade-offs across these objectives; do not invent measured scores.

@@ -1,0 +1,10 @@
+Task: {{ instance.task }}
+High scoring instructions:
+{% for item in good %}Score {{ item.score }}: {{ item.prompt }}
+{% endfor %}
+Low scoring instructions:
+{% for item in bad %}Score {{ item.score }}: {{ item.prompt }}
+{% endfor %}
+Compare their contrasting patterns. Preserve useful features of high scoring prompts,
+avoid features associated with poor performance, and derive an improved instruction.
+Return only the full instruction.

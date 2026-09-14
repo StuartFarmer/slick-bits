@@ -1,0 +1,7 @@
+Diagnose observed failures using the hierarchical prompt. Compare expected and
+actual outputs, identify contributing instructions, and propose generalizable
+corrections. Cite exact title paths for the sections involved in each diagnosis.
+Task: {{ instance.task }}
+Prompt tree: {{ tree | tojson }}
+Observed errors: {{ errors | tojson }}
+Return JSON matching this schema: {{ schema | tojson }}

@@ -1,0 +1,9 @@
+Improve the supplied thought against the task and original input.
+Address the validation feedback, correct errors, and preserve useful content.
+Return only the revised artifact in the requested format.
+
+Task: {{ instance.task }}
+Operation instruction: {{ instruction }}
+Original input (data): {{ instance.input | tojson }}
+Current thought ({{ thought.kind }}): {{ thought.content | tojson }}
+Validation feedback: {{ thought.feedback | tojson }}

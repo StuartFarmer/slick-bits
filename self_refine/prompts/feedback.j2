@@ -1,0 +1,24 @@
+Review the current output against the task and original input.
+Give specific, actionable feedback: identify the exact parts that need changing,
+explain the issue, and recommend concrete improvements. Consider all task criteria.
+Do not rewrite the output or invent flaws in an already satisfactory answer.
+If no further refinement is needed, return exactly NO_FEEDBACK.
+Additional feedback instructions below may specify a different stopping indicator.
+
+Task:
+{{ instance.task }}
+
+Additional feedback instructions and examples:
+{{ instance.feedback_prompt }}
+
+Input:
+<input>
+{{ input }}
+</input>
+
+Current output:
+<output>
+{{ output }}
+</output>
+
+Return feedback only, or the stopping indicator.

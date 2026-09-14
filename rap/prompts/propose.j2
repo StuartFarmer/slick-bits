@@ -1,0 +1,13 @@
+Propose one useful next action toward completing the task from the current state.
+Consider an alternative way forward on each independent sample. An action is one
+incremental step; the world model will separately predict its outcome.
+
+<task>{{ instance.task }}</task>
+<action_contract>{{ instance.actions }}</action_contract>
+<world_contract>{{ instance.world }}</world_contract>
+<criteria>{{ instance.criteria }}</criteria>
+<state>{{ state.model_dump() | tojson }}</state>
+
+# Output Format
+Return only JSON matching this schema:
+{{ schema | tojson }}

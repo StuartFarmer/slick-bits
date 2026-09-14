@@ -1,0 +1,6 @@
+Task: {{ instance.task }}
+Cross over two task definitions, considering their measured objective values.
+Objectives to maximize: {{ instance.objectives | tojson }}
+First: {{ first.instruction.definition }}; scores: {{ first.scores | tojson }}
+Second: {{ second.instruction.definition }}; scores: {{ second.scores | tojson }}
+Return the new definition as JSON matching {{ schema | tojson }}.

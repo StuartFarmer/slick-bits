@@ -1,0 +1,8 @@
+# Auto-CoT
+
+Port of [amazon-science/auto-cot/run_demo.py](https://github.com/amazon-science/auto-cot/blob/main/run_demo.py) and [run_inference.py](https://github.com/amazon-science/auto-cot/blob/main/run_inference.py), paper [2210.03493](https://arxiv.org/abs/2210.03493).
+
+`AutoCoT(task, provider, evaluate, embed).run(questions, clusters=8, ...)` generates zero-shot reasoning and answer extraction with separate Slick operations, embeds the questions, and selects one admissible demonstration per cluster in centroid-distance order. Selection checks question length, rationale line count, a final period, and a nonempty extracted answer. Optional arithmetic filtering checks the answer against the last sentence or last ten words. It never filters using gold correctness; a cluster with no passing trace is omitted. The final async evaluator receives the selected demonstrations and returns a finite higher-is-better score. `answer(question, provider=provider)` renders the selected demonstrations for inference.
+
+Configure `slick.prompts.TEMPLATE_ROOT = Path(auto_cot.__file__).parent / "prompts"` once. embed maps a sequence of question strings to a finite matrix. Counts include exactly two provider calls per question and one evaluation. Provider/evaluator failures propagate. The task-agnostic answer extraction instruction replaces benchmark-specific answer triggers and cleansing. Local NumPy K-means++/Lloyd replaces sklearn KMeans; coincident centers collapse, and initialization is not sklearn-bit-identical. The source reads existing zero-shot traces from logs; this port generates those same two stages directly. No datasets, model loading or benchmark reproduction are included.
+

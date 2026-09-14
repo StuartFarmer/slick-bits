@@ -1,0 +1,5 @@
+Predict the user's desired response for this new input using their elicited preferences.
+Task: {{ instance.task }}
+Questions and answers: {{ history | tojson }}
+New input: {{ query }}
+Return the predicted response in JSON matching {{ schema | tojson }}.

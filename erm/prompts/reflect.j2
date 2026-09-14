@@ -1,0 +1,6 @@
+Task: {{ instance.task }}
+Instruction: {{ instruction }}
+Incorrect examples: {{ failures | tojson }}
+Verified solution exemplars: {{ exemplars | tojson }}
+Use the detailed correct solutions to diagnose errors and propose distinct actionable
+instruction improvements. Return JSON matching {{ schema | tojson }}.

@@ -1,0 +1,12 @@
+{{ instance.task }}
+A prompt is to guide a language model to better solve the task. Each prompt is attached with a score. The better the prompt is, the higher the score is.
+I want you to generate only one new and better prompt for this task. For example, you can try word replacements, active/positive voice conversions, adding words or delete words.
+
+Here are some example prompts:
+{% for parent in parents %}
+Prompt: {{ parent.prompt }}
+Score: {{ parent.score }}
+{% endfor %}
+
+Now, generate only one new and better prompt based on all the information above, especially the given prompts. For example, you can try word replacements, active/positive voice conversions, adding words or delete words.
+Let's think step by step briefly. In the end, output one generated prompt inside curly brackets {}, such as {Please help me solve the task.}.

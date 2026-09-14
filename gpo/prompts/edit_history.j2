@@ -1,0 +1,9 @@
+Task: {{ instance.task }}
+Instruction: {{ instruction }}
+Current feedback: {{ feedback }}
+Historical parameter momentum:
+{% for item in history %}Score {{ item.score }}: {{ item.prompt }}
+{% endfor %}
+Task examples: {{ examples | tojson }}
+Use the scored history and feedback to improve this instruction. You are allowed to
+change up to {{ words }} words. Return the full instruction between <START> and <END>.

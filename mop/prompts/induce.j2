@@ -1,0 +1,8 @@
+Infer an instruction that captures task behavior shown in these demonstrations.
+Task: {{ instance.task }}
+These examples complement the demonstrations assigned to an expert.
+{% for example in examples %}
+Input: {{ example.input }}
+Output: {{ example.target }}
+{% endfor %}
+Return only the instruction.

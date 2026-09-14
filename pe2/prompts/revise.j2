@@ -1,0 +1,8 @@
+Complete stage two of prompt engineering. Review the example analysis and revise
+the instruction to describe the demonstrated task precisely and correct its errors.
+Task: {{ instance.task }}
+Current instruction: {{ instruction }}
+Stage-one analysis: {{ analysis }}
+Prior refinements and measured scores: {{ history | tojson }}
+Preserve useful instructions and follow improvements that previously helped.
+Return only the revised instruction.

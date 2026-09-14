@@ -1,4 +1,4 @@
-"""Reflective Evolution (ReEvo), with Slick calls and caller-owned evaluation."""
+"""Reflective Evolution adapted from ai4co/reevo; see README.md and LICENSE."""
 
 import math
 import random
@@ -20,6 +20,7 @@ class Config:
     long_reflection: bool = True
     maximize: bool = False
     seed: int = 0
+    black_box: bool = False
 
 
 @dataclass
@@ -59,13 +60,18 @@ class ReEvo:
         config: Config | None = None,
         seed_candidate: str | None = None,
         initial_reflection: str = "",
+        initial_provider: Provider | None = None,
+        reflector_provider: Provider | None = None,
     ):
         self.task, self.provider, self.evaluate = task, provider, evaluate
+        self.initial_provider = initial_provider if initial_provider is not None else provider
+        self.reflector_provider = reflector_provider if reflector_provider is not None else provider
         self.config = config if config is not None else Config()
         self.seed_candidate = seed_candidate
         self.initial_reflection = initial_reflection
         self.result = Result()
-        self.population = []
+        self.population: list[Individual] = []
+        self.seed_individual: Individual | None = None
         self.long_term = initial_reflection
         self.rng = random.Random(self.config.seed)
 
@@ -91,26 +97,33 @@ class ReEvo:
         return generated
 
     @prompt(template="reflect_pair.j2")
-    async def reflect_pair(self, worse, better, *, generated: str) -> str:
+    async def reflect_pair(self, worse: Individual, better: Individual, *, generated: str) -> str:
         """Compare an ordered worse/better pair."""
+        return generated
+
+    @prompt(template="reflect_pair_black_box.j2")
+    async def reflect_pair_black_box(
+        self, worse: Individual, better: Individual, *, generated: str
+    ) -> str:
+        """Infer hidden objective structure from relative candidate performance."""
         return generated
 
     @prompt(template="reflect_long.j2")
     async def reflect_long(self, prior: str, insights: list[str], *, generated: str) -> str:
         """Consolidate short reflections into bounded carried memory."""
-        return " ".join(generated.split()[:49])
+        return generated
 
-    def quality(self, individual):
+    def quality(self, individual: Individual) -> float:
         if individual.score is None:
             return math.inf
         return -individual.score if self.config.maximize else individual.score
 
     @property
-    def remaining(self):
+    def remaining(self) -> int:
         return self.config.max_evaluations - len(self.result.individuals)
 
     async def score(self, response, stage, generation, parents=()):
-        if not self.remaining:
+        if self.remaining <= 0:
             raise RuntimeError("evaluation budget exhausted")
         individual = Individual(
             len(self.result.individuals),
@@ -139,9 +152,9 @@ class ReEvo:
         return individual
 
     async def seed(self) -> None:
-        if self.seed_candidate is not None:
-            seed = await self.score(self.seed_candidate, "seed", 0)
-            if seed.error:
+        if self.seed_candidate is not None and self.remaining > 0:
+            self.seed_individual = await self.score(self.seed_candidate, "seed", 0)
+            if self.seed_individual.error:
                 self.result.stop_reason = "invalid_seed"
 
     async def initialize(self, execution: dict) -> None:
@@ -154,6 +167,11 @@ class ReEvo:
         elite = self.result.best
         if elite is not None and elite not in valid:
             valid.append(elite)
+        # Official black-box selection excludes candidates that do not beat the seed.
+        if self.config.black_box and self.seed_individual is not None:
+            valid = [
+                item for item in valid if self.quality(item) < self.quality(self.seed_individual)
+            ]
         if not valid:
             self.result.stop_reason = "no_valid_individuals"
             return []
@@ -169,9 +187,10 @@ class ReEvo:
 
     async def reflect(self, selected: list[list[Individual]], execution: dict) -> list[str]:
         insights = []
+        reflect_pair = self.reflect_pair_black_box if self.config.black_box else self.reflect_pair
         for worse, better in selected:
             insight = (
-                await self.reflect_pair(worse, better, **execution)
+                await reflect_pair(worse, better, **execution)
                 if self.config.short_reflection
                 else ""
             )
@@ -200,14 +219,17 @@ class ReEvo:
         generation: int,
         execution: dict,
     ) -> None:
+        raw_long_term = None
         if self.config.long_reflection and any(insights):
-            self.long_term = await self.reflect_long(self.long_term, insights, **execution)
+            raw_long_term = await self.reflect_long(self.long_term, insights, **execution)
+            self.long_term = " ".join(raw_long_term.split()[:49])
         self.result.reflections.append(
             {
                 "generation": generation,
                 "pairs": [[a.id, b.id] for a, b in selected],
                 "short_term": insights,
                 "long_term": self.long_term,
+                "raw_long_term": raw_long_term,
             }
         )
 
@@ -224,20 +246,25 @@ class ReEvo:
     async def run(self, *, session: Session | None = None) -> Result:
         """Run seed evaluation, initialization, and reflective generations on a fresh instance."""
         execution = {"session": session} if session is not None else {"provider": self.provider}
+        initialization = execution if session is not None else {"provider": self.initial_provider}
+        reflection = execution if session is not None else {"provider": self.reflector_provider}
         await self.seed()
         if self.result.stop_reason:
             return self.result
-        await self.initialize(execution)
+        await self.initialize(initialization)
         generation = 0
-        while self.remaining:
+        while self.remaining > 0:
             generation += 1
             selected = self.select_parents()
             if self.result.stop_reason:
                 break
-            insights = await self.reflect(selected, execution)
+            insights = await self.reflect(selected, reflection)
             offspring = await self.cross_population(selected, insights, generation, execution)
-            await self.update_reflections(selected, insights, generation, execution)
+            await self.update_reflections(selected, insights, generation, reflection)
             offspring.extend(await self.mutate_population(generation, execution))
+            if not offspring:
+                self.result.stop_reason = "no_offspring"
+                break
             self.population = offspring
         self.result.stop_reason = self.result.stop_reason or "budget"
         return self.result

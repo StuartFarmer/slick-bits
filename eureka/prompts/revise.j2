@@ -1,0 +1,9 @@
+Improve the reward function for this task: {{ instance.task }}.
+Environment observation and reward-code interface:
+{{ instance.interface }}
+Previous batch's selected program:
+{{ code }}
+Policy-training statistics or execution failure:
+{{ feedback | tojson }}
+Analyze whether each reward component helps learning. Rescale, rewrite, or remove ineffective components; diagnose constant or saturated components. Fix execution errors. Return the complete revised program.
+Return JSON matching {{ schema | tojson }}.

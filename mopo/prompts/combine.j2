@@ -1,0 +1,6 @@
+Task: {{ instance.task }}
+Apply this combination operator: {{ instruction }}
+First task prompt: {{ first }}
+Second task prompt: {{ second }}
+Preserve these literal tokens: {{ instance.required_tokens | tojson }}
+Return JSON matching {{ schema | tojson }}.

@@ -1,0 +1,7 @@
+Task: {{ instance.task }}
+Improve the examples by substitution, addition, or deletion. Return at most two examples.
+Objectives to maximize: {{ instance.objectives | tojson }}
+Definition: {{ parent.instruction.definition }}
+Examples: {{ parent.instruction.examples | tojson }}
+Scores: {{ parent.scores | tojson }}
+Return JSON matching {{ schema | tojson }}.

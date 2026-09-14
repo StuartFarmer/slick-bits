@@ -1,0 +1,4 @@
+Generate the most informative {{ question_type }} about the desired behavior for this task: {{ instance.task }}.
+It should reveal an aspect of the {{ instance.representation }} beyond what was already queried. Keep it bite-sized; ask about one thing at a time.
+Previous questions and answers: {{ history | tojson }}
+Return the question in JSON matching {{ schema | tojson }}.

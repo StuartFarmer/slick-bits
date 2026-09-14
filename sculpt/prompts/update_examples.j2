@@ -1,0 +1,7 @@
+Update this section's examples according to the supplied instruction. Return the
+complete resulting list, preserving useful existing examples and removing the
+incorrect or irrelevant ones. Use at most six examples in the task's format.
+Task: {{ instance.task }}
+Section: {{ section | tojson }}
+Instruction: {{ instruction }}
+Return JSON matching this schema: {{ schema | tojson }}

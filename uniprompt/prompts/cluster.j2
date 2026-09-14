@@ -1,0 +1,8 @@
+Task: {{ instance.task }}
+Group the indexed feedback by shared task facet. Aim for {{ group_count }} groups;
+place correct responses together. Every index must appear exactly once and groups
+must be nonempty.
+{% for feedback in feedbacks %}
+{{ loop.index0 }}: {{ feedback }}
+{% endfor %}
+Return JSON matching {{ schema | tojson }}.

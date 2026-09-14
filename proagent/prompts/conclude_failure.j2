@@ -1,0 +1,12 @@
+Conclude why the skill failed and what the next plan should account for.
+{% include "knowledge.j2" %}
+
+Rejected skill and authoritative feedback:
+{{ failed | tojson }}
+Initial explanation:
+{{ explanation }}
+Double-check:
+{{ review }}
+
+Return a concise plain-text correction grounded in this evidence. This conclusion
+advises the planner; it cannot authorize the failed skill or change the verifier.

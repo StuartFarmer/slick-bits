@@ -1,0 +1,40 @@
+Improve the child instruction by addressing the deficiencies of its parents.
+
+Task and output requirements:
+{{ instance.task }}
+
+The child instruction after crossover is:
+{{ child }}
+
+The first parent instruction is:
+{{ parent1 }}
+It gets the following examples wrong:
+{% for example in examples1 %}
+Model input: {{ example.input }}
+True answer and reference explanation: {{ example.expected }}
+Model prediction: {{ example.predicted }}
+Model justification: {{ example.justification }}
+{% endfor %}
+The problems with this parent and potential improvements are:
+{{ feedback1 }}
+
+The second parent instruction is:
+{{ parent2 }}
+It gets the following examples wrong:
+{% for example in examples2 %}
+Model input: {{ example.input }}
+True answer and reference explanation: {{ example.expected }}
+Model prediction: {{ example.predicted }}
+Model justification: {{ example.justification }}
+{% endfor %}
+The problems with this parent and potential improvements are:
+{{ feedback2 }}
+
+Follow the potential improvements on the parent instructions and optimize the child:
+1. Address the parents' problems by following their improvement suggestions.
+2. Preserve a valid instruction for the given task.
+3. Keep it concise, effective, and generally applicable to all cases.
+Empty feedback means no failure guidance was available for that parent.
+
+Return the optimized instruction wrapped in exactly one pair of tags:
+<OptimizedPrompt>Your optimized child instruction</OptimizedPrompt>

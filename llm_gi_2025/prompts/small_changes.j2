@@ -1,0 +1,31 @@
+Please give me 5 different {{ instance.language }} implementations of this fragment:
+```
+{{ content }}
+```
+This content belongs to the following task:
+{{ instance.task }}
+
+{{ instance.requirements }}
+Return complete replacements for the fragment. Label all replacements as {{ instance.language }} in separate fenced blocks.
+
+I will give you four examples of small changes you could try. If you have this content:
+```
+{{ examples[0] }}
+```
+Example 1: you could try copying a unit from one place to another like this:
+```
+{{ examples[1] }}
+```
+Example 2: you could try deleting a unit chosen at random like this:
+```
+{{ examples[2] }}
+```
+Example 3: you could try replacing one unit with another like this:
+```
+{{ examples[3] }}
+```
+Example 4: you could try swapping two units like this:
+```
+{{ examples[4] }}
+```
+In all of these examples, the units to change are chosen at random. They do not have to be whole lines, just valid units of the artifact.

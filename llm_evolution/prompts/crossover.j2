@@ -1,0 +1,5 @@
+Choose and apply a crossover operator to the two parents, producing a new valid solution for {{ instance.task }}.
+Operator knowledge: {{ instance.crossover_knowledge }}
+Parents and fitness (larger is better): {{ parents | tojson }}
+Preserve problem constraints and combine useful traits. Record the operator chosen and the resulting solution.
+Return JSON matching {{ schema | tojson }}.

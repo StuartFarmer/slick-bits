@@ -1,0 +1,6 @@
+Optimization task and domain context: {{ instance.task }}
+Parameter bounds: {{ instance.bounds | tojson }}
+Measured configuration outcomes: {{ observations | tojson }}
+Desired outcome: {{ target }}
+Condition on the desired outcome and the measured examples to propose {{ count }}
+distinct configurations likely to achieve it. Return JSON matching {{ schema | tojson }}.

@@ -1,0 +1,18 @@
+Solve the problem with a self-contained explanation using the supplied information.
+Do not call external tools. Finish with this exact format, replacing ANSWER with
+your final answer:
+Final Answer: The final answer is ANSWER. I hope it is correct.
+
+{% for example in instance.examples %}
+Problem:
+{{ example.problem }}
+
+Solution:
+{{ example.solution }}
+Final Answer: The final answer is {{ example.answer }}. I hope it is correct.
+
+{% endfor %}
+Problem:
+{{ instance.task }}
+
+Solution:

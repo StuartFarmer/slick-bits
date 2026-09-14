@@ -1,0 +1,7 @@
+Explain why this classification instruction mishandles the observed examples.
+Task: {{ instance.task }}
+Labels: {{ instance.labels | tojson }}
+Instruction: {{ instruction }}
+Mistakes, correct labels, and current boosting weights: {{ errors | tojson }}
+Identify changes that would help with these difficult cases.
+Return JSON matching {{ schema | tojson }}.

@@ -1,0 +1,8 @@
+Generate an instruction for this task using the demonstrations.
+Task: {{ instance.task }}
+
+{% for example in examples %}
+{{ example }}
+{% endfor %}
+
+Return only the instruction.

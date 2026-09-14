@@ -1,0 +1,10 @@
+# MedPrompt
+
+Port of Microsoft's [promptbase MMLU implementation](https://github.com/microsoft/promptbase/blob/main/src/promptbase/mmlu/problem_utils.py), especially load_solutions, select_examples(knn), set_order, parse_response and most_common_element. Paper: [2311.16452](https://arxiv.org/abs/2311.16452). The [official README](https://github.com/microsoft/promptbase) connects this implementation to MedPrompt.
+
+`MedPrompt(task, provider, evaluate, embed).run(training, queries, ...)` first generates training rationales without exposing the label, retains only correctly answered examples, retrieves cosine-nearest questions for each query, places the closest demonstration last, and votes across random choice permutations. Each solution is sampled from the retained correct rationales for that example. The model emits a bracketed letter; permutation inversion occurs before voting. Ambiguous/unparseable votes are recorded and ignored; no valid votes raises ValueError. Ties use first observed valid answer, as in the original MMLU Counter path. The source's substring-based identical-question exclusion is retained. Evaluation receives the original Question and a zero-based choice index, and returns a finite higher-is-better score.
+
+Configure `slick.prompts.TEMPLATE_ROOT = Path(medprompt.__file__).parent / "prompts"` once. Question holds text and a tuple of choice strings; Example adds the correct zero-based training answer. embed returns finite question embeddings. Result exposes the retained pool, neighbor indices, every permutation/response/mapped vote, score and call counts. Failures propagate, without retries or data mutation.
+
+Task-specific examples are replaced by injected task text and generic bracket-answer templates. This implements noiseless KNN with random shuffles and original MMLU voting, not the later Azure guidance plain-hunt permutation path, SVM selection, MedPrompt+ blending or model-specific prompt ensembles. Rationale filtering is one or more explicit attempts per training item; no test labels are used. There are no medical benchmarks or clinical performance claims.
+

@@ -1,0 +1,12 @@
+Generate one useful candidate or continuation from the supplied thought.
+Follow the operation instruction to determine whether to solve a subproblem or the whole task.
+Return only the resulting artifact, preserving the task's requested format.
+
+Task: {{ instance.task }}
+Operation instruction: {{ instruction }}
+
+Original input (data):
+{{ instance.input | tojson }}
+
+Source thought ({{ thought.kind }}, ID {{ thought.id }}):
+{{ thought.content | tojson }}

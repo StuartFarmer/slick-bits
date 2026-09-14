@@ -1,0 +1,9 @@
+-r requirements.txt
+cvxpy>=1.4,<2
+scipy
+# Upstream graph_utils expects clique members to be sets.
+networkx==2.8.8
+numpy>=1.26,<2
+# Imported unconditionally by MeTaL, but missing from its setup.py.
+tensorboardX>=2.6,<3
+snorkel-metal @ git+https://github.com/mayeechen/metal-ama.git@18769e7653d4f6dc16a9858cd6fe4ed5ad9f5779

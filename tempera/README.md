@@ -1,0 +1,13 @@
+# TEMPERA
+
+`TEMPERA` trains a query-conditioned prompt editor using PPO, then edits held-out prompts without reward access. Sources are [Zhang et al., 2022](https://arxiv.org/abs/2211.11890), the released [active environment](https://github.com/tianjunz/TEMPERA/blob/master/prompt_env.py) and [PPO implementation](https://github.com/tianjunz/TEMPERA/blob/master/a2c_ppo_acktr/algo/ppo.py). This port names the **released exemplar/verbalizer action variant**: stop, exemplar swap, replacement from the unused pool, and per-exemplar verbalizer selection. The paper also describes instruction-phrase operations; they are not active in the inspected environment and are not claimed here.
+
+```python
+agent = TEMPERA(task, encode, forward, evaluate, pool_size=20, verbalizer_count=4)
+await agent.run(parameters, training_queries, PromptState((0, 1), (0, 0)))
+prompt = await agent.edit(new_query, initial_prompt)
+```
+
+Async `encode(query, state, actions)` provides a fixed-shape numeric observation including state and ordered action features. It must not read held-out labels. Async `forward(parameters, normalized_observation)` returns action logits, their `[actions, parameters]` Jacobian, scalar value prediction and its parameter gradient. Supply the source attention policy/frozen LM encoder here when comparing checkpoints. The owner enumerates edits, samples actions, computes score differences and GAE, normalizes observations, applies clipped PPO policy/value losses with entropy, clips gradients and updates parameters with Adam. Async `evaluate(query, state)` supplies higher-is-better training score (e.g. a label-probability margin); it is never called by `edit()`.
+
+Adaptations: one serial episode per query, full-batch PPO epochs, fixed edit horizon treated as terminal, no source episode augmentation, and one stop action instead of duplicate terminal actions. Replacement keeps a position's verbalizer, matching the active replacement code; swapping carries the verbalizer with its exemplar. The returned state uses pool indices so callers retain rendering and data ownership. Frozen inference normalization and cached rollout observations prevent held-out updates and PPO normalization drift. Training uses at most `iterations * len(training_queries) * (1 + max_edits)` rewards; stop avoids redundant evaluation. Single-transition advantage normalization is defined as zero. Nonfinite observations, model outputs, gradients or rewards raise; no retries. No prose generation/templates are needed for numerical actions. These tests validate the learning mechanics, not reported benchmark accuracy.

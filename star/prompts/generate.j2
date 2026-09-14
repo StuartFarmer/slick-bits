@@ -1,0 +1,18 @@
+Solve the input using the task instructions. Produce a rationale, then the final answer.
+Follow the reasoning style of the demonstrations.
+
+Task:
+{{ instance.task }}
+
+Demonstrations:
+{% for example in instance.demonstrations %}
+Input: {{ example.input | tojson }}
+Response: {"rationale": {{ example.rationale | tojson }}, "answer": {{ example.answer | tojson }}}
+{% endfor %}
+
+Input: {{ input | tojson }}
+
+# Output Format
+Return only a JSON object matching this schema, with rationale before answer.
+Both fields must contain nonblank text. Follow the task's answer format exactly.
+{{ schema | tojson }}

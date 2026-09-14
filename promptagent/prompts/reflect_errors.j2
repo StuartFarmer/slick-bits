@@ -1,0 +1,12 @@
+Analyze failures of the current prompt and identify improvements.
+Task: {{ instance.task }}
+Current prompt:
+{{ instruction }}
+
+Incorrect examples:
+{% for example in examples %}
+{{ example }}
+{% endfor %}
+
+Examine each incorrect answer and explain how the prompt contributed to it.
+Summarize the changes needed across these examples. Return the feedback as prose.

@@ -1,0 +1,35 @@
+Task and constraints:
+{{ instance.task }}
+
+The examples demonstrate [problem, search process, solution]. Follow their search
+structure, including failed branches and recovery, rather than copying answers
+or treating the number of demonstrated steps as a required search length.
+{% for example in instance.examples %}
+<example>
+Problem:
+{{ example.input }}
+Search process:
+{{ example.search }}
+Solution:
+{{ example.answer }}
+</example>
+{% endfor %}
+
+<problem>
+{{ input }}
+</problem>
+
+<starting_candidates>
+{{ warm_start }}
+</starting_candidates>
+
+Treat starting candidates as suggestions to check against the original problem.
+All exploration and assessment must occur in this single response, without tools
+or requests for another model call. Do not assume a solution exists. If the search
+remains incomplete, report the best partial result and unresolved constraints;
+failure to find an answer is not proof of impossibility.
+
+After the search, place the final answer or artifact after a standalone line
+exactly "answer:" (without quotes). Reserve that line for the final artifact;
+do not use it in the search. Put only the artifact after it, without commentary
+or an added code fence unless the task requires one.

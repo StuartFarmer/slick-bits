@@ -1,0 +1,7 @@
+Task: {{ instance.task }}
+Infer an instruction and useful demonstrations from these input/output examples.
+{% for example in examples %}
+{{ example }}
+{% endfor %}
+Jointly design the instruction and its example list.
+Return JSON matching {{ schema | tojson }}.

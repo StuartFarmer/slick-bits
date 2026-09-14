@@ -1,6 +1,7 @@
 """Exercise generic genetic-programming decisions with the shared scripted provider."""
 
 import asyncio
+import json
 import unittest
 from pathlib import Path
 from unittest.mock import patch
@@ -45,7 +46,7 @@ class LLMGPChecks(unittest.TestCase):
                 result = await agent.run()
                 self.assertEqual(result.best.content, "z")
                 self.assertEqual(result.evaluations, 4)
-                self.assertEqual(evaluated, ["aa", "bbbb", "z"])
+                self.assertEqual(evaluated, ["aa", "bbbb", "z", "ccc"])
                 self.assertEqual(result.calls, 3)
                 self.assertTrue(all(task in call for call in provider.calls))
                 self.assertEqual(result.stop_reason, "generations")
@@ -180,6 +181,7 @@ class LLMGPChecks(unittest.TestCase):
                     '{"content":"aa"}',
                     '{"content":"bbbb"}',
                     '{"content":"z"}',
+                    '{"content":"ccc"}',
                 ]
             )
 
@@ -196,7 +198,162 @@ class LLMGPChecks(unittest.TestCase):
                 mutation_rate=1,
             ).run()
             self.assertEqual(result.best.content, "z")
-            self.assertEqual(result.calls, 3)
+            self.assertEqual(result.calls, 4)
+
+        asyncio.run(check())
+
+    def test_full_offspring_population_competes_with_elite(self):
+        async def check():
+            provider = ScriptedProvider(
+                ['{"content":"old"}', '{"content":"worse"}', '{"contents":["aa","z"]}']
+            )
+
+            async def evaluate(content):
+                return len(content)
+
+            result = await llm_gp.LLMGP(
+                "Minimize length.",
+                provider,
+                evaluate,
+                population_size=2,
+                generations=2,
+                crossover_rate=1,
+                mutation_rate=0,
+            ).run()
+            self.assertEqual([p.content for p in result.population], ["z", "aa"])
+            self.assertEqual(result.evaluations, 4)
+            self.assertEqual([p.content for p in result.history[0]], ["old", "worse"])
+
+        asyncio.run(check())
+
+    def test_tournaments_sample_distinct_competitors(self):
+        async def check():
+            async def evaluate(content):
+                return len(content)
+
+            agent = llm_gp.LLMGP("Minimize length.", None, evaluate, population_size=2)
+            agent.population = [
+                llm_gp.Individual(content="a", score=1),
+                llm_gp.Individual(content="bbbb", score=4),
+            ]
+            for _ in range(20):
+                parents = await agent._choose_parents(None)
+                self.assertEqual([p.content for p in parents], ["a", "a"])
+
+        asyncio.run(check())
+
+    def test_code_whitespace_is_preserved_and_blank_output_rejected(self):
+        async def check():
+            code = "    return value\n\n"
+            provider = ScriptedProvider(
+                [json.dumps({"content": " \n"}), json.dumps({"content": code})]
+            )
+            evaluated = []
+
+            async def evaluate(content):
+                evaluated.append(content)
+                return 1
+
+            result = await llm_gp.LLMGP(
+                "Generate an indented function body.",
+                provider,
+                evaluate,
+                population_size=1,
+                generations=1,
+            ).run()
+            self.assertEqual(result.best.content, code)
+            self.assertEqual(evaluated, [code])
+            self.assertEqual(result.calls, 2)
+            self.assertEqual(len(result.errors), 1)
+
+        asyncio.run(check())
+
+    def test_malformed_variation_keeps_parents_and_counts_failures(self):
+        async def check():
+            provider = ScriptedProvider(
+                [
+                    "not JSON",
+                    '{"content":"a"}',
+                    '{"content":"bb"}',
+                    '{"contents":["only one child"]}',
+                    '{"content":" "}',
+                    "{}",
+                ]
+            )
+
+            async def evaluate(content):
+                return len(content)
+
+            result = await llm_gp.LLMGP(
+                "Minimize length.",
+                provider,
+                evaluate,
+                population_size=2,
+                generations=2,
+                crossover_rate=1,
+                mutation_rate=1,
+            ).run()
+            self.assertEqual([p.content for p in result.population], ["a", "a"])
+            self.assertEqual(result.calls, 6)
+            self.assertEqual(result.evaluations, 4)
+            self.assertEqual(len(result.errors), 4)
+
+        asyncio.run(check())
+
+    def test_odd_population_maximization_and_partial_budget(self):
+        async def check():
+            async def evaluate(content):
+                return len(content)
+
+            responses = [
+                '{"content":"a"}',
+                '{"content":"bb"}',
+                '{"content":"ccc"}',
+                '{"contents":["dddd","eeeee"]}',
+                '{"contents":["ffffff","discard"]}',
+            ]
+            for budget, expected_size, expected_best, stop in (
+                (0, 0, None, "budget"),
+                (4, 2, "eeeee", "budget"),
+                (5, 3, "ffffff", "generations"),
+            ):
+                result = await llm_gp.LLMGP(
+                    "Maximize length.",
+                    ScriptedProvider(responses),
+                    evaluate,
+                    population_size=3,
+                    generations=2,
+                    crossover_rate=1,
+                    mutation_rate=0,
+                    maximize=True,
+                    max_calls=budget,
+                ).run()
+                self.assertEqual(len(result.population), expected_size)
+                self.assertEqual(result.best.content if result.best else None, expected_best)
+                self.assertEqual(result.calls, budget)
+                self.assertEqual(result.stop_reason, stop)
+                self.assertEqual(result.evaluations, 0 if not budget else 3 + expected_size)
+
+        asyncio.run(check())
+
+    def test_all_templates_render_with_explicit_owner_binding(self):
+        async def check():
+            agent = llm_gp.LLMGP("Evolve a sorting function.", None, None, maximize=True)
+            population = [llm_gp.Individual(content="candidate", score=1)]
+            operations = [
+                (llm_gp.LLMGP.initialize, ()),
+                (llm_gp.LLMGP.crossover, (["a", "b"], ["sample"])),
+                (llm_gp.LLMGP.mutate, ("a", ["sample"])),
+                (llm_gp.LLMGP.select_parents, (population,)),
+                (llm_gp.LLMGP.replace_population, (population,)),
+                (llm_gp.LLMGP.designate_best, (population,)),
+            ]
+            for operation, args in operations:
+                rendered = await operation.render(agent, *args)
+                self.assertIn(agent.task, rendered)
+                self.assertIn('"properties"', rendered)
+                self.assertIn("Return JSON", rendered)
+            self.assertIn("Higher scores are better", rendered)
 
         asyncio.run(check())
 

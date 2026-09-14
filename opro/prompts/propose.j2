@@ -1,0 +1,21 @@
+Generate a candidate solution that improves the measured objective for the task below.
+Task: {{ instance.task }}
+
+Previous solutions are ordered from worst to best; {{ instance.score_direction }} scores are better:
+{% for item in trajectory %}
+text:
+{{ item.prompt }}
+score:
+{{ item.score }}
+{% endfor %}
+
+Task examples:
+{% for example in exemplars %}
+{{ example }}
+{% endfor %}
+
+Use the score differences to find promising directions while exploring new possibilities.
+Propose a solution different from the previous ones, aiming for a {{ instance.score_direction }} score
+than all of them. Follow the task's solution format and constraints.
+Return only the candidate solution inside exactly one <TEXT>...</TEXT> pair.
+An external evaluator will measure the score; do not invent a score in your response.

@@ -1,0 +1,20 @@
+Improve a successful prompt using evidence of its strengths and its earlier revisions.
+Task: {{ instance.task }}
+Current prompt:
+{{ instruction }}
+
+Correct examples:
+{% for example in examples %}
+{{ example }}
+{% endfor %}
+
+Strengths and opportunities:
+{{ gradient }}
+
+Ancestor prompts in order, including the current prompt:
+{% for ancestor in trajectory %}
+{{ loop.index }}. {{ ancestor }}
+{% endfor %}
+
+Generate {{ count }} prompts that preserve the strengths and improve this trajectory.
+Wrap each prompt with <START> and <END>.

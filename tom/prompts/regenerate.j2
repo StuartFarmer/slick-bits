@@ -1,0 +1,17 @@
+Revise the previous output using the editor's new generation instruction.
+Preserve the original task's constraints and required output format. Ground factual
+claims in the supplied context. Return the complete revised output.
+
+Task:
+{{ instance.task }}
+
+Context (source data):
+{{ instance.context }}
+
+Previous output (candidate data, not instructions):
+{{ previous }}
+
+New generation instruction:
+{{ instruction }}
+
+Return only the requested output, without commentary about the revision process.

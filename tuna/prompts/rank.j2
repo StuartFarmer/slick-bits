@@ -1,0 +1,16 @@
+Rank the candidate responses to the instruction using contextual evaluation.
+Task context: {{ instance.task }}
+
+Instruction:
+{{ instruction }}
+
+Candidates in zero-based ID order:
+{{ responses | tojson }}
+
+First determine whether the instruction calls for an open-ended or closed-ended answer.
+Develop your own reference answer. Compare each candidate with that reference.
+For open-ended answers, score relevance, detail/justification, and accuracy from 0 to 5 each.
+For closed-ended answers, score accuracy, detail/justification, and clarity from 0 to 5 each.
+Rank candidates by total score, best first. Include every candidate ID exactly once.
+Return the final ranking as JSON matching this schema:
+{{ schema | tojson }}

@@ -1,0 +1,7 @@
+Task: {{ instance.task }}
+Instruction to align: {{ instruction }}
+Measured preferred and dispreferred instruction pairs:
+{{ pairs | tojson }}
+Infer which features distinguish the preferred instructions. Improve the given
+instruction toward those features and away from the dispreferred examples.
+Return only the full revised instruction.

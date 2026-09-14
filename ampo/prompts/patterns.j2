@@ -1,0 +1,5 @@
+Task: {{ instance.task }}
+Error reasons: {{ reasons | tojson }}
+Condense these reasons into distinct general error patterns. Assign each a numerical
+importance score reflecting its prevalence and impact (higher means more important).
+Return JSON matching {{ schema | tojson }}.

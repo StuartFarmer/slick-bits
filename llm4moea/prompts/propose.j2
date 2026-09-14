@@ -1,0 +1,16 @@
+Now you will help me minimize a function with {{ instance.bounds | length }} variables.
+Task context: {{ instance.task }}
+This function is a Chebyshev scalar subproblem of {{ instance.objectives }} objectives,
+all minimized. Its values below already incorporate the current weights and ideal point.
+Coordinates are normalized to [0, 1]; return coordinates in that same range.
+I have some points and the function values of them. The points start with <start>
+and end with <end>. The points are arranged in descending order based on their
+function values, where lower values are better.
+{% for point, value in samples %}
+point: <start>{{ point | join(',') }}<end>
+value: {{ value }}
+{% endfor %}
+Give me {{ count }} new points that are different from all points above, and have a
+function value lower than any of the above. Do not write code. Do not give any
+explanation. Each output new point must start with <start> and end with <end>.
+Put exactly {{ instance.bounds | length }} comma-separated numeric coordinates in each point.

@@ -1,0 +1,29 @@
+{# Adapted from amazon-science/CriSPO; Copyright Amazon.com, Inc. or its affiliates.
+   SPDX-License-Identifier: CC-BY-NC-4.0. See ../README.md for source and modifications. #}
+Your task is to append a postscript to the main instruction for this task: {{ instance.task }}
+
+The main instruction is fixed:
+<instruction>{{ main_prompt }}</instruction>
+
+Optimize these metrics jointly: {{ metrics | tojson }}. Higher metric values are better.
+Scores below are negative mean ranks across the metrics over all training candidates.
+Higher scores are better; they are recomputed as new candidates enter the archive.
+Below are previous postscripts with their scores and critiques, ordered from lower to higher score.
+{% for item in trajectory %}
+<rated_postscript>
+<postscript>{{ item.text }}</postscript>
+<score>{{ item.score }}</score>
+<metrics>{{ item.metrics | tojson }}</metrics>
+<critique>{{ item.critique }}</critique>
+</rated_postscript>
+{% endfor %}
+
+Generate a short postscript that is different from the postscripts above and aims for a higher score.
+It should be concise, effective, and generally applicable to unseen inputs.
+
+1. Compare high-score postscripts to low-score ones and synthesize their critiques and suggestions. List concise actionable improvements in <suggestion> tags.
+2. Apply the suggestions to improve the additional metrics while preserving performance on {{ instance.primary_metric }}.
+3. Vary wording, paraphrase, phrase order, grammar, and sentence order.
+4. Write only the final new postscript in one nonempty <postscript>...</postscript> block.
+
+Do not rewrite or repeat the main instruction. Do not introduce data placeholders or copy reference answers.

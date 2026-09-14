@@ -1,0 +1,7 @@
+Refine the classification instruction using the reflection on its mistakes.
+Task: {{ instance.task }}
+Labels: {{ instance.labels | tojson }}
+Instruction: {{ instruction }}
+Reflection: {{ reflection }}
+Return only a new instruction; example and output-format components are managed by the caller.
+Return JSON matching {{ schema | tojson }}.

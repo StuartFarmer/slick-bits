@@ -1,0 +1,22 @@
+Produce the final artifact for the supplied input. Follow the task and hard rules.
+Apply the reusable instruction and relevant demonstrations. Return only the artifact,
+without private reasoning, a defense of your answer, or commentary for an evaluator.
+
+<task>{{ instance.task }}</task>
+<hard_rules>
+{% for rule in instance.rules %}
+- {{ rule }}
+{% endfor %}
+</hard_rules>
+<instruction>{{ instruction }}</instruction>
+<demonstrations>
+{% for example in examples %}
+<example>
+<input>{{ example.input }}</input>
+<context>{{ example.context }}</context>
+<output>{{ example.output }}</output>
+</example>
+{% endfor %}
+</demonstrations>
+<input>{{ case.input }}</input>
+<context>{{ case.context }}</context>

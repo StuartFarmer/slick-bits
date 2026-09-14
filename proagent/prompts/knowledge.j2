@@ -1,0 +1,17 @@
+Task: {{ instance.task }}
+Your role: {{ instance.role }}
+Teammates: {{ instance.teammates | tojson }}
+
+Instructions, rules, and task knowledge:
+{{ instance.knowledge }}
+
+Allowed skills for your role (including caller-defined arguments and preconditions):
+{% for skill in instance.skills %}
+- {{ skill.name }}: {{ skill.description }}
+{% endfor %}
+
+Task examples:
+{{ instance.examples }}
+
+Current observed state at step {{ observation.step }}:
+{{ observation.description }}

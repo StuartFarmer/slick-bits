@@ -1,0 +1,15 @@
+Improve the instruction using the observed errors and their explanation.
+Task: {{ instance.task }}
+Current instruction:
+{{ instruction }}
+
+Errors:
+{% for error in errors %}
+{{ error }}
+{% endfor %}
+
+Explanation:
+{{ gradient }}
+
+Write {{ count }} improved instructions that address this explanation.
+Wrap each instruction with <START> and <END>.

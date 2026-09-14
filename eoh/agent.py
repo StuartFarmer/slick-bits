@@ -1,11 +1,12 @@
-"""Evolve textual ideas with ranked exploration and modification operators."""
+"""Evolve heuristic descriptions and implementations with EoH's five operators."""
 
 import math
 import random
 from collections.abc import Awaitable, Callable
+from types import SimpleNamespace
 from typing import Annotated
 
-from pydantic import BaseModel, Field, StringConstraints
+from pydantic import BaseModel, Field, StringConstraints, ValidationError, field_validator
 from slick import Session, prompt
 from slick.providers import Provider, ProviderError
 
@@ -15,12 +16,23 @@ OPERATORS = ("E1", "E2", "M1", "M2", "M3")
 
 class Proposal(BaseModel, extra="forbid", frozen=True):
     description: Text
-    content: Text
+    content: str = Field(min_length=1)
+
+    @field_validator("content")
+    @classmethod
+    def nonblank_content(cls, content: str) -> str:
+        if not content.strip():
+            raise ValueError("candidate content must not be blank")
+        return content
 
 
 class Individual(Proposal):
     id: int
     fitness: float = Field(allow_inf_nan=False)
+
+
+class CandidateRejected(Exception):
+    """The evaluator found an infeasible candidate; consume its attempt and continue."""
 
 
 class EoH:
@@ -39,6 +51,7 @@ class EoH:
         self.score_direction = "Higher" if maximize else "Lower"
         self.attempts: list[dict] = []
         self.history: list[tuple[Individual, ...]] = []
+        self.evaluations = 0
 
     @prompt(template="initialize.j2", output_type=Proposal)
     async def initialize(self, *, generated: Proposal) -> Proposal:
@@ -83,15 +96,16 @@ class EoH:
     ) -> list[Individual]:
         """Initialize, generate N attempts per selected operator, then select elites.
 
-        Parse, provider, evaluation-value and timeout failures consume attempts.
-        Initialization is bounded; other unexpected errors abort.
+        Generated schema errors, explicit candidate rejections, nonfinite scores,
+        and evaluation timeouts consume attempts. Unexpected errors abort.
+        Provider failures consume attempts except with a caller-owned Session,
+        whose pending conversation must be resumed by the caller.
         """
         init_attempts = 3 * population_size if init_attempts is None else init_attempts
         self.rng = random.Random(seed)
-        self.execution = (
-            {"session": session} if session is not None else {"provider": self.provider}
-        )
+        self.session = session
         self.attempts, self.history = [], []
+        self.evaluations = 0
         population = await self._initialize_population(population_size, init_attempts)
         population = self._select_survivors(population, population_size)
         for generation in range(1, generations + 1):
@@ -128,15 +142,9 @@ class EoH:
         return offspring
 
     def _select_parents(self, population: list[Individual], count: int) -> list[Individual]:
-        # One-based rank weights; sample without replacement from the generation snapshot.
-        ranked = population.copy()
-        weights = [1 / (rank + len(ranked)) for rank in range(1, len(ranked) + 1)]
-        selected = []
-        for _ in range(count):
-            index = self.rng.choices(range(len(ranked)), weights=weights, k=1)[0]
-            selected.append(ranked.pop(index))
-            weights.pop(index)
-        return selected
+        # Official v0.1 prob_rank.py: one-based ranks, sampling with replacement.
+        weights = [1 / (rank + len(population)) for rank in range(1, len(population) + 1)]
+        return self.rng.choices(population, weights=weights, k=count)
 
     def _select_survivors(self, candidates: list[Individual], size: int) -> list[Individual]:
         population = sorted(candidates, key=lambda item: item.fitness, reverse=self.maximize)[:size]
@@ -151,18 +159,43 @@ class EoH:
             "parents": tuple(item.id for item in selected),
         }
         self.attempts.append(record)
+
+        async def recorded_call(context, **kwargs):
+            if self.session is None:
+                response, requests = await self.provider.acall(context, **kwargs)
+            else:
+                # Finish the Session as text before Slick parses the proposal. A
+                # malformed JSON response must not leave its conversation pending.
+                response, requests = await self.session.arun(context), []
+            record["raw_response"] = response
+            return response, requests
+
         try:
             inputs = (selected,) if selected else ()
-            proposal = await propose(*inputs, **self.execution)
+            try:
+                proposal = await propose(*inputs, provider=SimpleNamespace(acall=recorded_call))
+            except ValidationError as exc:
+                raise CandidateRejected(f"invalid generated proposal: {exc}") from exc
+            except (ProviderError, TimeoutError) as exc:
+                if self.session is not None:
+                    raise
+                raise CandidateRejected(f"generation failed: {exc}") from exc
             record["proposal"] = proposal
-            fitness = float(await self.evaluate(proposal.content))
+            self.evaluations += 1
+            try:
+                fitness = float(await self.evaluate(proposal.content))
+            except TimeoutError as exc:
+                raise CandidateRejected(f"evaluation timed out: {exc}") from exc
             if not math.isfinite(fitness):
-                raise ValueError("fitness must be finite")
+                raise CandidateRejected("fitness must be finite")
             record["fitness"] = fitness
+            record["status"] = "accepted"
             return Individual(**proposal.model_dump(), id=record["id"], fitness=fitness)
-        except (ProviderError, ValueError, TimeoutError) as exc:
+        except CandidateRejected as exc:
+            record["status"] = "rejected"
             record["error"] = f"{type(exc).__name__}: {exc}"
             return None
         except Exception as exc:
+            record["status"] = "error"
             record["error"] = f"{type(exc).__name__}: {exc}"
             raise

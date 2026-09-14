@@ -1,0 +1,20 @@
+Adapt the source insights for an agent solving a related target task. Ground the
+adaptation in the target demonstrations. Return one very concise, easy-to-follow
+instructional paragraph, without rule numbers or explanations of the transfer.
+
+Source task interface:
+{{ instance.task }}
+
+Source rules and importance:
+{% for insight in instance.insights %}
+{{ loop.index }}. {{ insight.text }} [importance: {{ insight.importance }}]
+{% endfor %}
+
+Target task interface:
+{{ target_task }}
+
+Target demonstrations:
+{% for example in examples %}
+Task: {{ example.task }}
+{{ example.trajectory }}
+{% endfor %}

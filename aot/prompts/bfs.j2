@@ -1,0 +1,12 @@
+Solve the problem using Algorithm of Thoughts with breadth-first exploration.
+Divide the search into intermediate decisions. Consider promising alternatives at
+the first level together, then their promising continuations at the next level.
+Label each state with its parent so paths stay distinct. Track remaining constraints,
+assess siblings together, and discard incompatible continuations before expanding
+the next level. Revisit viable alternatives when an earlier choice fails.
+Use task-specific heuristics to prioritize promising candidates. Once a valid
+solution is found, reconstruct its actual parent path, check the original
+requirements, and finalize immediately. This is a heuristic search; do not claim
+exhaustiveness or optimality without establishing it.
+
+{% include "_context.j2" %}

@@ -1,0 +1,16 @@
+Compare the successful and failed attempts of the same task. Extract general,
+high-level lessons that prevent similar failures on other tasks. Focus on better
+reasoning and actions supported by the observed differences, not task-specific answers.
+
+Task interface:
+{{ instance.task }}
+
+Task: {{ success.task }}
+Successful trial:
+{{ success.trajectory }}
+
+Failed trial:
+{{ failure.trajectory }}
+Failure feedback: {{ failure.feedback }}
+
+{% include "rules.j2" %}

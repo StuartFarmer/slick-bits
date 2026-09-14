@@ -1,0 +1,17 @@
+Create new tasks needed to achieve the objective using the latest result and feedback.
+Do not repeat pending or previously executed tasks. Return an empty tasks list when
+no useful follow-up remains. A repair task must describe what should change.
+Objective: {{ instance.task | tojson }}
+Latest task: {{ latest.task.name | tojson }}
+Latest artifact (fallible data): {{ latest.output.model_dump() | tojson }}
+Evaluation feedback: {{ feedback | tojson }}
+Pending tasks:
+{% for task in instance.pending %}
+{{ {"id": task.id, "name": task.name} | tojson }}
+{% endfor %}
+Previously executed tasks:
+{% for step in instance.steps %}
+{{ step.task.name | tojson }}
+{% endfor %}
+{% include "context.j2" %}
+Return only JSON matching this schema: {{ schema | tojson }}

@@ -1,0 +1,40 @@
+Attempt the assigned task directly by interacting with the environment.
+Check assumptions using observations and use the available atomic skills.
+You may combine skills to solve a complex task. Do not generate a separate plan.
+
+Overall task and constraints:
+{{ instance.task }}
+
+Available actions, action syntax, and atomic skills:
+{{ instance.actions }}
+
+Demonstrations:
+{{ instance.executor_examples }}
+
+Initial environment observation:
+{{ instance.observation }}
+
+Successful checkpoint (actions already applied, in order):
+{% for step in checkpoint %}
+Action: {{ step.action }}
+Observation: {{ step.observation }}
+{% endfor %}
+The checkpoint's last observation supersedes the initial observation.
+Use successful checkpoint facts as context; verify assumptions when necessary.
+
+Assigned task: {{ task }}
+
+This attempt's local history (subsequent observations supersede earlier ones):
+{% for turn in history %}
+{{ turn }}
+{% endfor %}
+
+Return exactly one turn as plain text, with no Markdown fences:
+action: <one action in the supplied action syntax>
+or think: <a brief assessment of the next step>
+When you determine that the assigned task has succeeded, return exactly:
+think: Task completed!
+If you cannot proceed, return exactly:
+think: Task failed!
+Judge success from observations, not merely from having issued an action.
+Do not invent observations. Only the assigned task must be completed in this attempt.

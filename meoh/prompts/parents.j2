@@ -1,0 +1,10 @@
+<parents>
+{% for parent in parents %}
+<heuristic id="{{ parent.id }}">
+Description: {{ parent.description }}
+Artifact:
+{{ parent.content }}
+Measured objectives: {{ parent.objectives | tojson }}
+</heuristic>
+{% endfor %}
+</parents>

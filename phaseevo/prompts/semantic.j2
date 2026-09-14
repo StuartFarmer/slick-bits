@@ -1,0 +1,5 @@
+Task: {{ instance.task }}
+Paraphrase this prompt while retaining its meaning. You may remove redundant examples.
+Do not add examples or change the task.
+Prompt: {{ candidate.model_dump() | tojson }}
+Return JSON matching {{ schema | tojson }}.

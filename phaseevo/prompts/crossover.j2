@@ -1,0 +1,6 @@
+Task: {{ instance.task }}
+Cross over these prompts with complementary measured error patterns.
+Combine useful instruction components and demonstrations without inventing new examples.
+First: {{ first.model_dump() | tojson }}
+Second: {{ second.model_dump() | tojson }}
+Return JSON matching {{ schema | tojson }}.

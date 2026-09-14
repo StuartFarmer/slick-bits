@@ -1,0 +1,6 @@
+Task: {{ instance.task }}
+Mutate the task definition, guided by its measured objective values.
+Objectives to maximize: {{ instance.objectives | tojson }}
+Definition: {{ parent.instruction.definition }}
+Scores: {{ parent.scores | tojson }}
+Return only the new definition as JSON matching {{ schema | tojson }}.

@@ -1,0 +1,7 @@
+Task: {{ instance.task }}
+Infer a candidate from a desired numerical task outcome.
+{% for example in examples %}Outcome: {{ example.value }}
+Candidate: {{ example.candidate }}###
+{% endfor %}
+Desired outcome: {{ target }}
+Return only a candidate description followed by ###.

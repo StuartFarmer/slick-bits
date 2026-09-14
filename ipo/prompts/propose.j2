@@ -1,0 +1,8 @@
+Generate {{ count }} human-readable class templates for a frozen vision-language classifier.
+Task: {{ instance.task }}
+Include the literal class placeholder {{ instance.class_token }} in every template.
+Seek higher classification accuracy and lower cross-entropy loss than the history.
+Use the visual descriptions to identify transferable visual attributes; avoid memorizing individual images.
+Training-image descriptions: {{ instance.descriptions | tojson }}
+Previous templates, ordered from lower to higher accuracy: {{ memory | tojson }}
+Return JSON matching {{ schema | tojson }}.

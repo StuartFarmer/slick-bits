@@ -1,0 +1,28 @@
+Refine the latest output using the feedback and original input.
+Use the full history to avoid repeating previous mistakes. Preserve parts that
+already satisfy the task and address specific issues identified in the feedback.
+
+Task:
+{{ instance.task }}
+
+Additional refinement instructions and examples:
+{{ instance.refinement_prompt }}
+
+Input:
+<input>
+{{ input }}
+</input>
+
+Previous outputs and feedback, in chronological order:
+{% for step in history %}
+<iteration index="{{ loop.index0 }}">
+<output>
+{{ step.output }}
+</output>
+<feedback>
+{{ step.feedback }}
+</feedback>
+</iteration>
+{% endfor %}
+
+Return only the complete revised output in the task's required format.

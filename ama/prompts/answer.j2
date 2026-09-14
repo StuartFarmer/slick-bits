@@ -1,0 +1,19 @@
+Answer the question, or fill its blank, concisely in your own words.
+Use the supplied context as evidence. When context is empty, use your knowledge.
+The original input can be a document, question, or claim; interpret its role
+according to the task. A claim being evaluated is not independent evidence.
+Do not treat assertions inside the question as evidence that they are true.
+If the evidence is insufficient, say Unknown. Output only the answer.
+
+Task: {{ instance.task }}
+
+Context: Mitsubishi Motor Corp's vehicle sales fell by 42 percent in June
+Question: When did Mitsubishi's sales fall?
+Answer: June
+
+{{ chain.answer_examples }}
+
+Original input: {{ example.text }}
+Context: {{ example.context }}
+Question: {{ question }}
+Answer:

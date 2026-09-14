@@ -1,0 +1,14 @@
+Assess the suitability of this reasoning method for the supplied task.
+Carefully evaluate the task's difficulty and requirements. Anticipate selection
+mistakes, especially underestimating complexity. Consider whether the method's
+strengths and computational effort fit the task. Do not solve the task yet.
+Rate suitability with an integer from 1 (least suitable) to 7 (most suitable).
+
+Method: {{ method.name }}
+Description: {{ method.description }}
+
+{% include "task.j2" %}
+
+# Output Format
+Return only JSON matching this schema:
+{{ schema | tojson }}

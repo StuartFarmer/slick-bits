@@ -1,0 +1,8 @@
+Infer a task instruction from these demonstrations.
+Task: {{ instance.task }}
+
+{% for example in demonstrations %}
+{{ example }}
+{% endfor %}
+
+What was the instruction for this task? Return only the instruction.

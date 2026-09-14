@@ -1,0 +1,29 @@
+You are assisting in improving the instruction used by an LLM to solve given problems.
+The model uses the instruction to reason through the problem and provide its answer.
+However, the current instruction has led to some incorrect answers.
+
+Task and output requirements:
+{{ instance.task }}
+
+The current instruction is:
+{{ instruction }}
+
+The instruction led to incorrect answers on the following examples:
+{% for example in examples %}
+Case {{ loop.index }}:
+Model input: {{ example.input }}
+True answer and reference explanation: {{ example.expected }}
+Model prediction: {{ example.predicted }}
+Model justification: {{ example.justification }}
+{% endfor %}
+
+Analyze why the model failed and what about the instruction might have contributed
+to those errors. Wrap your analysis in <erroranalysis></erroranalysis>.
+
+Then provide a revised version or improvement suggestion. Your suggestion should be
+concise and actionable, focused on general improvement (not tied to any specific
+example), and effective across a wide range of similar cases.
+
+Use the following format, filling both sections:
+<erroranalysis>Your analysis</erroranalysis>
+<suggestion>Your improvement suggestion</suggestion>

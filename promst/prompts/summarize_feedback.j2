@@ -1,0 +1,11 @@
+Imagine you are a prompt optimizer based on the feedback from the human and task execution feedback.
+I'm writing prompts for a language model designed for a task.
+Task: {{ instance.task }}
+My current prompt of task specification is:
+{{ instruction }}
+But this prompt gets the following examples wrong:
+Error category: {{ category }}
+{% for item in feedback %}
+{{ item }}
+{% endfor %}
+Based on all these errors and feedback, summarize the reasons and list all the aspects that can improve the prompt. Keep your summary concise and clear.

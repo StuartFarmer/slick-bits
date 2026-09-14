@@ -1,0 +1,13 @@
+AdaEvolve for Slick
+
+Contains adaptations of SkyDiscover's AdaEvolve implementation.
+Copyright 2025 SkyDiscover Team.
+Upstream: https://github.com/skydiscover-ai/skydiscover
+Revision: 0d932b690670a7e544388ad362e9876c8bd256a0
+Licensed under the Apache License, Version 2.0 (see LICENSE).
+
+Modified for problem-agnostic text candidates, caller-owned evaluation, Slick
+generation boundaries, and local Jinja templates. The adaptive equations follow
+the supplied AdaEvolve paper where the inspected source differs. Text diversity,
+tactic representation and rotation, and adaptive controller mechanisms were
+adapted from upstream; see README.md for source paths and behavioral changes.

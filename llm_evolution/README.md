@@ -1,0 +1,9 @@
+# LLM evolutionary optimization (LMEA)
+
+`LLMEvolution(task, provider, evaluate, crossover_knowledge=..., mutation_knowledge=...).run(initial, rounds=10, population_size=5, candidates=16)` implements the evolutionary-computing path of [Large Language Models as Evolutionary Optimizers](https://arxiv.org/abs/2310.19046). Each child uses LLM-selected parents, an LLM-selected/applied crossover and an LLM-selected/applied mutation. The best unique parents and final children survive. Intermediate crossover artifacts are recorded but not scored. The async evaluator measures finite fitness, maximized; negative loss supports minimization.
+
+Official source: [llm_tsp.py](https://github.com/cschen1205/LMEA/blob/main/src/models/llm_tsp.py), particularly `llm_process_ec` and `evaluate`. This is distinct from EvoPrompt's host-side parent selection. The caller supplies initial solutions and operator knowledge appropriate to its problem, replacing sixfold TSP random initialization and permutation-specific PMX/OX/swap/insert/inversion instructions. The evaluator owns validity and execution isolation.
+
+Adaptations: the original combined 16-child tagged generation is split into three explicit Slick operations per child with JSON contracts. Generation sees a frozen population during each round. Duplicate candidates are cached globally. Optional source temperature/population adaptation, permutation repair, basic non-EC prompting and disabled self-reflection experiments are not included. These changes are a problem-agnostic algorithm port, not a literal prompt reproduction.
+
+Set Slick's global template root to local `prompts/`. Returns best candidate, final population, selected operators and ancestry, and distinct evaluation count. Check: `rtk proxy optimizer/.venv/bin/python -B -m unittest tests.test_llm_evolution`.

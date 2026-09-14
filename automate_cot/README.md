@@ -1,0 +1,10 @@
+# Automate-CoT
+
+Port of [SHUMKASHUN/Automate-CoT/src/example_selection.py](https://github.com/SHUMKASHUN/Automate-CoT/blob/main/src/example_selection.py), linked by [shizhediao/automate-cot](https://github.com/shizhediao/automate-cot), paper [2302.12822](https://arxiv.org/abs/2302.12822).
+
+`AutomateCoT(task, provider, evaluate).run(pool, slots=8, steps=20, ...)` learns independent categorical probabilities over a supplied rationale-demonstration pool. The async evaluator receives the resulting ordered demonstration strings and returns a finite **loss to minimize** on caller-owned training examples. The local loop samples multiple slot assignments, centers their losses, applies the source's signed inverse-probability estimator with 1/(samples-1), clips the gradient norm at 3, updates Adam, and projects each row onto the unit simplex with floor 0.0001. Source prepending reverses slot order; this is retained. Modes of the final distributions form the deployed prompt; repeat examples are allowed. Counts are steps*samples_per_step+1 evaluations. Failures propagate without retries.
+
+The signed source estimator is twice the conventional centered REINFORCE direction; the factor is retained and tested against a finite-difference expected-loss direction. Two released-code defects are deliberately corrected: independent derivative arrays replace list-multiplied aliases, and every supplied pool item is eligible instead of the hardcoded pool-size/8 truncation. Exact simplex projection also fixes the source bisection's inability to restore a row whose mass is below one. Constant learning rate is used; the source Lightning cosine schedule is omitted. The supplied pool replaces task-specific rationale pool preprocessing; the source's answer-token loss heuristics and 10-million scale are evaluator choices, not reproduced task semantics.
+
+Configure `slick.prompts.TEMPLATE_ROOT = Path(automate_cot.__file__).parent / "prompts"` before `answer(question, provider=provider)`. No model training or API execution infrastructure is included. Tests exercise real probability updates, projection and numerical direction; they do not establish paper performance.
+

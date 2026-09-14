@@ -1,0 +1,9 @@
+# Generative elicitation
+
+`GenerativeElicitation(task, provider, oracle, representation="instruction").run(queries=10, mode="question", question_type="open-ended question", history=())` asks informative questions, records oracle answers, and synthesizes a hypothesis. `mode="edge_case"` elicits preferences on concrete examples instead. The async `oracle(question)` can be a human interface or a simulator; no oracle is assumed. `predict(history, query, provider=provider)` conditions a prediction on the same answers.
+
+Sources: [paper](https://arxiv.org/abs/2310.11589), official [question agent](https://github.com/alextamkin/generative-elicitation/blob/da7c9f7a9030ebac1551cf3a8fe9af21ef56b928/generative_questions_agent.py), [edge-case agent](https://github.com/alextamkin/generative-elicitation/blob/da7c9f7a9030ebac1551cf3a8fe9af21ef56b928/generative_edge_cases_agent.py), and [base agent](https://github.com/alextamkin/generative-elicitation/blob/da7c9f7a9030ebac1551cf3a8fe9af21ef56b928/base_active_learning_agent.py). The released selection rule asks the model for informative queries; it does not calculate information gain numerically.
+
+Adaptations: generic representations replace the regex benchmark; JSON text contracts replace bare text. Hypothesis generation happens once after elicitation, without automatic compilation or invalid-regex retries. Predictions are generic text rather than binary match probabilities. All failures propagate; the supplied history is copied. The query budget excludes the final hypothesis call. Returns hypothesis, complete interaction history and oracle-call count. No hidden target labels enter generation.
+
+Set Slick's process-global template root to this folder's absolute `prompts/` directory. Check: `rtk proxy optimizer/.venv/bin/python -B -m unittest tests.test_generative_elicitation`.

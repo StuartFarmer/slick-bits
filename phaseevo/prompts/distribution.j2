@@ -1,0 +1,7 @@
+Task: {{ instance.task }}
+Infer a better prompt from this population, ordered from lower to higher fitness.
+Combine instruction patterns and existing demonstrations; do not invent new examples.
+{% for parent in parents %}
+{{ loop.index }}: {{ parent.model_dump() | tojson }}
+{% endfor %}
+Return JSON matching {{ schema | tojson }}.

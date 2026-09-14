@@ -1,0 +1,7 @@
+Task: {{ instance.task }}
+Choose the reasoning instruction most suitable for this particular problem.
+Problem: {{ problem }}
+{% for candidate in candidates %}
+{{ loop.index0 }}: {{ candidate }}
+{% endfor %}
+Return its zero-based index as JSON matching {{ schema | tojson }}.

@@ -1,0 +1,45 @@
+Decompose the assigned task into a short, abstract plan, typically 3–5 steps.
+The executor has already attempted this task and could not complete it directly.
+Make each step independently understandable and simpler than the failed task.
+Preserve all requirements, quantities, dependencies, and constraints of the task.
+Further decomposition will occur only if an executor cannot complete a step.
+
+Overall task and constraints:
+{{ instance.task }}
+
+Available atomic skills and action interface:
+{{ instance.actions }}
+
+Example decompositions:
+{{ instance.planner_examples }}
+
+Initial environment observation:
+{{ instance.observation }}
+
+Successful checkpoint from which your plan will start:
+{% for step in checkpoint %}
+Action: {{ step.action }}
+Observation: {{ step.observation }}
+{% endfor %}
+
+Assigned task: {{ task }}
+Executor stopping reason: {{ failure }}
+Last observation from the unsuccessful attempt:
+{{ last_observation }}
+This last observation may help exploration, but failed actions are not committed.
+Your plan starts from the successful checkpoint, not the failed attempt's state.
+
+Use AND for steps that must all succeed sequentially.
+Use OR for alternative ways to achieve the same subgoal; the controller stops
+at the first successful alternative. Each alternative starts at the same checkpoint.
+Group mixed logic with parentheses. For example:
+Execution Order: ((Step 1 OR Step 2) AND Step 3)
+Logical grouping does not require additional model-generated decomposition.
+
+Return numbered task descriptions followed by one Execution Order expression:
+Step 1: <first subtask>
+Step 2: <second subtask>
+Execution Order: (Step 1 AND Step 2)
+Use as many numbered steps as the plan needs. Reference every step exactly once.
+The expression may contain only Step numbers, AND, OR, and parentheses.
+Optional brief comments may precede steps. Do not append anything after the expression.

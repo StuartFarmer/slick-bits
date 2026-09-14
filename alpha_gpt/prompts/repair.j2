@@ -1,0 +1,9 @@
+Correct the rejected candidate using the evaluator's diagnostic. Preserve the
+refined idea and obey the task's interface. Do not invent evaluation results.
+Task: {{ instance.task }}
+Idea: {{ idea.model_dump() | tojson }}
+Rejected candidate: {{ candidate.model_dump() | tojson }}
+Diagnostic: {{ error }}
+
+# Output Format
+Return only JSON matching {{ schema | tojson }}.

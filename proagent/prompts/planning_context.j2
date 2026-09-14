@@ -1,0 +1,19 @@
+{% include "knowledge.j2" %}
+
+Recent trajectories, verification outcomes, and issued actions:
+{{ history | tojson }}
+
+Historical predictions and actually observed teammate behaviors:
+{{ beliefs | tojson }}
+
+Use observations to correct earlier mistaken expectations. Predictions are
+hypotheses, not facts; absent behavior is unknown, not a confirmed match or mismatch.
+Events may arrive late, and a skill can span several steps. Compare their timing
+and meaning without assuming that each event matches a same-step prediction.
+Infer each teammate's next likely intention, then select exactly one skill for
+your role that complements them. Do not control teammates or assume communication.
+Keep the analysis a concise decision rationale grounded in the supplied evidence.
+
+# Output Format
+Return only JSON matching this schema:
+{{ schema | tojson }}

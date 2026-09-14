@@ -1,0 +1,12 @@
+Solve the problem using Algorithm of Thoughts with depth-first exploration.
+Divide the search into intermediate decisions and choose a promising first move.
+Explore its subtree: propose alternatives for each subproblem, track the current
+state and remaining constraints, and assess continuations together in context.
+Prune branches that violate constraints. At a dead end, backtrack to the nearest
+decision with a promising unexplored alternative; reuse what earlier attempts
+revealed. Keep sibling candidates together and use useful task-specific heuristics
+instead of blindly enumerating every possibility or repeatedly restarting.
+Once a valid solution is found, reconstruct it from the selected decisions,
+check it against the original requirements, and finalize immediately.
+
+{% include "_context.j2" %}

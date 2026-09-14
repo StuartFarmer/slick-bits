@@ -1,0 +1,24 @@
+Choose exact numeric parameters for the next steps of this running optimizer.
+Use measured progress to pace continuation. Delay irreversible tightening while
+the relevant readiness metric shows unresolved structure. Respond to stagnation
+and deterioration; a nominal schedule is guidance, not a mandatory transition.
+Request a restart only when a valid best snapshot exists and recovery is useful.
+Return every configured parameter, a Boolean restart, and a short decision note.
+
+Task: {{ instance.task }}
+Objective direction: {{ instance.direction }}
+Parameter names, bounds, initial values, meanings, and monotonicity:
+{{ instance.parameter_contract | tojson }}
+
+Caller-supplied domain guidance:
+{{ instance.guidance }}
+
+Measured observation (budget_used is a fraction; relative changes are signed):
+{{ observation | tojson }}
+Hard metric gates are enforced by Python even between model calls. A threshold_key
+refers to the current settings value. Restarts restore solver state and retain
+the new parameter request subject to the gates on the restored state.
+
+# Output Format
+Return only JSON matching this schema:
+{{ schema | tojson }}

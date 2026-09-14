@@ -1,0 +1,5 @@
+Task: {{ instance.task }}
+Apply this paraphrasing operator: {{ instruction }}
+Task prompt: {{ parent }}
+Preserve these literal tokens: {{ instance.required_tokens | tojson }}
+Return JSON matching {{ schema | tojson }}.

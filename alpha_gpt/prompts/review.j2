@@ -1,0 +1,31 @@
+Interpret the evaluated candidates for the researcher. Explain how each selected
+candidate's components implement the idea. Compare seeds and search results using
+only the supplied measurements; explain failures and propose the next direction.
+Clearly distinguish measured evidence from hypotheses. An empty population means
+no qualified result; do not claim a successful discovery. Do not infer held-out
+performance or generalization from search scores.
+Task: {{ instance.task }}
+Idea: {{ idea.model_dump() | tojson }}
+{{ instance.score_direction }} scores are better.
+Seed results:
+{% for item in seeds %}
+Content: {{ item.content }}
+Explanation: {{ item.explanation }}
+Score: {{ item.evaluation.score }}
+Metrics: {{ item.evaluation.metrics | tojson }}
+Evaluator feedback: {{ item.evaluation.feedback }}
+{% endfor %}
+Selected results:
+{% for item in population %}
+Content: {{ item.content }}
+Score: {{ item.evaluation.score }}
+Metrics: {{ item.evaluation.metrics | tojson }}
+Evaluator feedback: {{ item.evaluation.feedback }}
+{% endfor %}
+Failures:
+{% for failure in failures %}
+{{ failure.stage }}: {{ failure.content }}: {{ failure.error }}
+{% endfor %}
+
+# Output Format
+Return only JSON matching {{ schema | tojson }}.

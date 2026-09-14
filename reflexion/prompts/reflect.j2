@@ -1,0 +1,30 @@
+Reflect on a failed attempt at this task. Identify the mistake using the observed
+trajectory and evaluator feedback, then devise a concise, actionable plan for the
+next attempt. Explain what to change, rather than merely summarizing the attempt.
+Distinguish evidence from hypotheses when the feedback is sparse. Consider earlier
+lessons so that the next attempt can avoid repeating an unsuccessful approach.
+
+<task>
+{{ instance.task }}
+</task>
+<input>
+{{ input }}
+</input>
+<trajectory>
+<output>{{ trajectory.output }}</output>
+<trace>{{ trajectory.trace }}</trace>
+</trajectory>
+<evaluation>
+Passed: {{ evaluation.passed }}
+Reward (None means not supplied): {{ evaluation.reward }}
+Feedback: {{ evaluation.feedback }}
+</evaluation>
+<experience>
+{% for reflection in memory %}
+<reflection>{{ reflection }}</reflection>
+{% endfor %}
+</experience>
+
+Return a short first-person reflection and a concrete plan as plain text. Preserve
+the specific details needed to use that plan, since the next actor receives these
+reflections without the raw failed trajectories. Do not produce a revised answer.

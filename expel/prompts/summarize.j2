@@ -1,0 +1,15 @@
+Examine successes on different tasks and extract common practices that improve
+reasoning and actions on future tasks. Successful attempts can still contain
+suboptimal steps; retain only lessons supported by the observations.
+
+Task interface:
+{{ instance.task }}
+
+{% for success in successes %}
+<successful_trial>
+Task: {{ success.task }}
+{{ success.trajectory }}
+</successful_trial>
+{% endfor %}
+
+{% include "rules.j2" %}

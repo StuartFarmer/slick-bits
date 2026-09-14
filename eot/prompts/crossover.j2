@@ -1,0 +1,6 @@
+Task: {{ instance.task }}
+Cross over the following reasoning instructions into one complementary instruction.
+{% for parent in parents %}
+{{ parent }}
+{% endfor %}
+Return JSON matching {{ schema | tojson }}.

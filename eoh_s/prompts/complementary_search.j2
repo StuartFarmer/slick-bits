@@ -1,0 +1,24 @@
+Create a new heuristic distinct from the two supplied designs to improve the
+complementary performance of a heuristic set across diverse instances.
+
+<task>
+{{ instance.task }}
+</task>
+
+The parents have the largest Manhattan distance between their per-instance costs
+in the current population. Use their differing behavior to explore a new design.
+Lower costs are better; costs use the same instance order for both parents.
+
+<parents>
+{% for parent in parents %}
+{{ parent.model_dump() | tojson }}
+{% endfor %}
+</parents>
+
+First describe the new heuristic and its main steps in one sentence. Then provide
+the complete candidate artifact satisfying the task's format and interface.
+
+# Output Format
+Return only JSON matching this schema, with the thought in description and the
+complete artifact in content; do not wrap the JSON in Markdown fences.
+{{ schema | tojson }}

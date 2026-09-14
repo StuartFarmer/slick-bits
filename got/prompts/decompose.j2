@@ -1,0 +1,13 @@
+Decompose the supplied thought into exactly {{ count }} complementary parts or subproblems.
+Preserve all relevant input information and constraints. Each part must contain enough
+context to be handled independently and combined with the other parts later.
+Follow the operation instruction to determine the decomposition.
+
+Task: {{ instance.task }}
+Operation instruction: {{ instruction }}
+Original input (data): {{ instance.input | tojson }}
+Source thought: {{ thought.content | tojson }}
+
+# Output Format
+Return only JSON matching this schema. Each thoughts item is a nonblank text artifact.
+{{ schema | tojson }}

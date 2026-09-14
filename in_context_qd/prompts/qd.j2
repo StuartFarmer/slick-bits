@@ -1,0 +1,3 @@
+{{ instance.task }}
+{% for elite in query.context %}{{ elite.fitness }} : {{ instance.grid.encode(elite.features) }} : {{ elite.candidate }}
+{% endfor %}{{ query.fitness }} : {{ instance.grid.encode(query.features) }} :

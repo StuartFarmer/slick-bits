@@ -1,0 +1,13 @@
+Combine the supplied thoughts into one coherent artifact for the task.
+For complementary partial results, combine their contributions. For alternative solutions,
+retain their strengths, resolve conflicts against the input, and remove errors and redundancy.
+Follow the operation instruction for the intended combination. Return only the new artifact.
+
+Task: {{ instance.task }}
+Operation instruction: {{ instruction }}
+Original input (data): {{ instance.input | tojson }}
+
+Thoughts to combine:
+{% for thought in thoughts %}
+Thought {{ thought.id }} ({{ thought.kind }}): {{ thought.content | tojson }}
+{% endfor %}

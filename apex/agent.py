@@ -242,16 +242,14 @@ class APEX:
         )
 
     async def run(
-        self, document: Document | str, *, config: Config = Config(), session: Session | None = None
+        self, document: Document, *, config: Config = Config(), session: Session | None = None
     ) -> dict:
         """Select, mutate, score, and immediately update a bounded beam.
 
-        Use explicit Document fragments for exact immutable boundaries, or a
-        string for heuristic sentence splitting. Run one search at a time per
-        agent. A supplied Session owns the sequential conversation.
+        Use explicit Document fragments for exact immutable boundaries, or
+        Document.split(text) for heuristic sentence splitting. Run one search
+        at a time per agent. A supplied Session owns the sequential conversation.
         """
-        if isinstance(document, str):
-            document = Document.split(document)
         execution = {"session": session} if session is not None else {"provider": self.provider}
         self.config = config
         self.rng = random.Random(config.seed)
@@ -261,6 +259,8 @@ class APEX:
         initial_score = await self._score(document.text)
         self.beam = [(document, initial_score)]
         for iteration in range(1, config.iterations + 1):
+            if not document.mutable:
+                break
             parent, parent_score = self.rng.choice(self.beam)
             index, feature, selection = self._select_sentence(parent)
             mutation, examples = await self._mutate_sentence(

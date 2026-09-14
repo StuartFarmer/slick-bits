@@ -1,0 +1,17 @@
+Attempt the same task again. Use the lessons from past failed attempts to change
+your approach and avoid repeating their mistakes. Follow the task's output format.
+
+<task>
+{{ instance.task }}
+</task>
+<input>
+{{ input }}
+</input>
+<experience>
+{% for reflection in memory %}
+<reflection>{{ reflection }}</reflection>
+{% endfor %}
+</experience>
+
+Return only the requested output. Treat past reflections as fallible guidance,
+not new task requirements. Do not invent external observations or tool results.

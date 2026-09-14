@@ -1,0 +1,11 @@
+Turn the critic feedback into targeted edits to the hierarchical prompt. Preserve
+all unrelated sections. Use rephrase, create, delete, merge, reorder, or examples.
+Task: {{ instance.task }}
+Prompt tree: {{ tree | tojson }}
+Critic feedback: {{ feedback | tojson }}
+Paths are lists of exact section titles. Rephrase edits only body. Delete removes
+the named subtree. Create inserts section at position among the children of path
+(empty path means root). Merge replaces source sibling paths with section under
+path at position. Reorder lists every child title of path once. Examples supplies
+an instruction for a separate example update. Preserve the six-example limit.
+Return JSON matching this schema: {{ schema | tojson }}

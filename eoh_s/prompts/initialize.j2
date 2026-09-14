@@ -1,0 +1,15 @@
+Create a new heuristic for the task without parent candidates.
+
+<task>
+{{ instance.task }}
+</task>
+
+First describe the heuristic and its main steps in one sentence. Then provide
+the complete candidate artifact in the format and interface required by the task.
+The artifact may be code, instructions, or another textual representation.
+Evaluation uses one cost per instance; lower is better.
+
+# Output Format
+Return only JSON matching this schema. Put the thought in description and the
+complete artifact in content; do not wrap the JSON in Markdown fences.
+{{ schema | tojson }}

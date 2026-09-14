@@ -16,6 +16,7 @@ AGENTS = (
     "multiagent_debate",
     "optimizer",
     "pot",
+    "prompt_programming",
     "qube",
     "reevo",
 )

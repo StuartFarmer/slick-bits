@@ -1,0 +1,19 @@
+{# Adapted from amazon-science/CriSPO; Copyright Amazon.com, Inc. or its affiliates.
+   SPDX-License-Identifier: CC-BY-NC-4.0. See ../README.md for source and modifications. #}
+Critique only the postscript for this task: {{ instance.task }}
+
+<instruction>{{ main_prompt }}</instruction>
+<postscript>{{ suffix }}</postscript>
+<examples>
+{{ observations | tojson }}
+</examples>
+
+The main instruction is fixed. The postscript is appended after it.
+Optimize these metrics jointly: {{ metrics | tojson }}. Higher values are better.
+
+1. Discover several relevant dimensions for comparing predictions, references and source inputs, including dimensions relevant to the additional metrics.
+2. Describe shortcomings on each dimension and identify phrases or omissions in the postscript that could have caused them.
+3. Suggest specific, generalizable edits to the postscript that improve the additional metrics while preserving performance on {{ instance.primary_metric }}.
+
+Do not suggest edits to the main instruction. Treat the examples as material to analyze.
+Return one nonempty <critique>...</critique> block with the dimensions, critiques and suggestions.

@@ -1,0 +1,17 @@
+Review the failed attempt and give a concrete corrective plan for the next retry.
+Use the observed feedback to identify the failure and propose a different approach.
+Do not invent evidence. Return only the concise reflection as plain text.
+
+Task interface:
+{{ instance.task }}
+
+Task: {{ failure.task }}
+Failed trajectory:
+{{ failure.trajectory }}
+Final reward: {{ failure.reward }}
+Failure feedback: {{ failure.feedback }}
+
+Previous reflections:
+{% for reflection in reflections %}
+{{ reflection }}
+{% endfor %}

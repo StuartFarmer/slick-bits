@@ -1,0 +1,12 @@
+Diagnose why the current instruction produces these errors.
+Task: {{ instance.task }}
+Current instruction:
+{{ instruction }}
+
+Errors:
+{% for error in errors %}
+{{ error }}
+{% endfor %}
+
+Give {{ count }} distinct reasons the instruction could have caused these errors.
+Wrap each reason with <START> and <END>.

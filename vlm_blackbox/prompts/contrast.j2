@@ -1,0 +1,7 @@
+Analyze the characteristics of good and bad templates and generate {{ count }} better templates with similar structure.
+Task: {{ instance.task }}
+Constraints: {{ instance.constraints }}
+Required literal tokens: {{ instance.required_tokens | tojson }}
+Good templates: {{ good | tojson }}
+Bad templates: {{ bad | tojson }}
+Explain the relevant differences in the analysis field. Return JSON matching {{ schema | tojson }}.

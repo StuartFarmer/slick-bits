@@ -1,0 +1,12 @@
+Analyze the strengths of a prompt that answered this batch correctly.
+Task: {{ instance.task }}
+Current prompt:
+{{ instruction }}
+
+Correct examples:
+{% for example in examples %}
+{{ example }}
+{% endfor %}
+
+Explain what enabled these correct answers and how the prompt could improve further.
+Return the feedback as prose.

@@ -1,0 +1,6 @@
+Task: {{ instance.task }}
+Instruction: {{ instruction }}
+Incorrect examples: {{ failures | tojson }}
+Retrieved historical feedback: {{ feedbacks | tojson }}
+Integrate this group of useful past feedback into a coherent refined invariant task
+instruction. Exemplars are supplied separately per question. Return only the instruction.

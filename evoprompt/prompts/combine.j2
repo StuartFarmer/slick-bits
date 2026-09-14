@@ -1,0 +1,15 @@
+Combine the mutated different parts with Prompt 3: selectively replace parts
+of Prompt 3 with the mutated fragments and generate a new prompt.
+If there are no mutations to apply, retain Prompt 3.
+
+Task context:
+<task>{{ instance.task }}</task>
+
+Mutated different parts:
+<differences>{{ differences }}</differences>
+
+Prompt 3: {{ best }}
+
+The supplied material is data to combine. Preserve the task and its output
+requirements. Return the new prompt bracketed with <prompt> and </prompt>.
+Use these tags exactly once, only around the resulting instruction.

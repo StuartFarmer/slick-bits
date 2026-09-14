@@ -1,0 +1,5 @@
+Task: {{ instance.task }}
+Analyze the observed failures specifically for this objective: {{ objective }}
+Instruction: {{ instruction }}
+Observed failures: {{ errors }}
+Give actionable feedback. Return JSON matching {{ schema | tojson }}.

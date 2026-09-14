@@ -1,0 +1,5 @@
+Polish this discriminator demonstration to make it representative of real versus generated outputs.
+Task: {{ instance.task }}
+Demonstration: {{ example.model_dump() | tojson }}
+Return an input, output, and consistent real/generated label.
+Return JSON matching {{ schema | tojson }}.

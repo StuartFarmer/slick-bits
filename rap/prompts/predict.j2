@@ -1,0 +1,21 @@
+Act as the world model: predict the state after applying this single action.
+Resolve the proposed subquestion or simulate the action's consequences. Preserve
+all established facts, constraints, and intermediate results needed by later
+steps. Describe the resulting state, not just a proposed action. Never claim to
+have executed an action or observed an external system.
+
+Mark terminal true only when the task is resolved or this path cannot continue.
+For a resolved task, put the final answer in answer; use null for a dead end or
+an unfinished task. A plan or proof may itself be the answer. Keep equivalent
+states and final answers in a consistent, concise canonical form for voting.
+
+<task>{{ instance.task }}</task>
+<action_contract>{{ instance.actions }}</action_contract>
+<world_contract>{{ instance.world }}</world_contract>
+<criteria>{{ instance.criteria }}</criteria>
+<state>{{ state.model_dump() | tojson }}</state>
+<action>{{ action }}</action>
+
+# Output Format
+Return only JSON matching this schema:
+{{ schema | tojson }}

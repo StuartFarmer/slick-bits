@@ -1,0 +1,6 @@
+{{ instance.task }}
+Continue the following ordered examples with new inputs from the same task distribution.
+{% for example in demonstrations %}Input: {{ example.input }}
+Label: {{ example.label }}
+{% endfor %}
+Return only the new input texts as JSON matching {{ schema | tojson }}.

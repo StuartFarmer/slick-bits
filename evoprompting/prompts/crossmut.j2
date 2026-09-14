@@ -1,0 +1,17 @@
+Generate one improved candidate for this task:
+{{ instance.task }}
+
+Combine and vary the examples below, using their measured metrics and the target
+metrics to guide the new candidate. Return only the complete candidate text,
+without commentary, Markdown fences, or another metrics block.
+
+{% for parent in parents %}
+"""Metrics:
+{{ parent.metrics | tojson }}
+"""
+{{ parent.content }}
+
+{% endfor %}
+"""Metrics:
+{{ targets | tojson }}
+"""

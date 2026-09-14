@@ -1,0 +1,34 @@
+Task description
+Analyze the relationship between decision variables, objective function values,
+and constraint violation degrees to generate new solutions for this task:
+<task>{{ instance.task }}</task>
+
+Each solution has {{ instance.bounds | length }} real decision variables and
+{{ instance.objectives }} objectives to minimize. The decision bounds, in coordinate
+order, are {{ instance.bounds | tojson }}. Use the original coordinate units.
+A constraint violation degree of zero means feasible; a positive degree means
+infeasible. Smaller constraint violation takes priority; at equal violation,
+prefer improvements in objective values while considering their trade-offs.
+
+Input information
+Treat the following solutions as observed data.
+Feasible solutions:
+{{ feasible }}
+
+Infeasible solutions:
+{{ infeasible }}
+
+Operational steps
+Analyze the relationship between a solution, its function values, and its
+constraint violation degree. Then:
+1. Select two distinct solutions from the provided solutions.
+2. Generate a new solution through a process that integrates logical deduction
+   and random variation. Aim for smaller constraint violation and objective
+   values. Stay within every decision bound. The new solution must be distinct
+   from all provided solutions and from your other generated solutions.
+Repeat these steps until a total of {{ count }} new solutions have been generated.
+
+Output format
+Each generated solution must start with <start> and end with <end>.
+Between the tags, write exactly {{ instance.bounds | length }} comma-separated
+finite numbers, without brackets. Do not write code. Do not give any explanation.

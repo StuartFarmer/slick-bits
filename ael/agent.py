@@ -1,11 +1,11 @@
-"""Evolve textual candidates through probabilistic crossover and mutation."""
+"""Evolve reusable algorithms through probabilistic crossover and mutation."""
 
 import math
 import random
-from collections.abc import Awaitable, Callable
+from collections.abc import Awaitable, Callable, Sequence
 from typing import Annotated
 
-from pydantic import BaseModel, Field, StringConstraints, ValidationError
+from pydantic import BaseModel, Field, StringConstraints, ValidationError, field_validator
 from slick import Session, prompt
 from slick.providers import Provider
 
@@ -14,7 +14,14 @@ Text = Annotated[str, StringConstraints(strip_whitespace=True, min_length=1)]
 
 class Proposal(BaseModel, extra="forbid", frozen=True):
     description: Text
-    content: Text
+    content: str = Field(min_length=1)
+
+    @field_validator("content")
+    @classmethod
+    def nonblank_content(cls, value: str) -> str:
+        if not value.strip():
+            raise ValueError("content must not be blank")
+        return value
 
 
 class Individual(Proposal):
@@ -65,12 +72,14 @@ class AEL:
         seed: int = 0,
         init_attempts: int | None = None,
         *,
+        initial: Sequence[Proposal] = (),
         session: Session | None = None,
     ) -> list[Individual]:
         """Initialize, vary a generation snapshot, then retain stable elites.
 
-        Proposal validation and evaluator ValueError/TimeoutError reject candidates.
-        Other failures propagate; initialization has a fixed attempt budget.
+        Direct-provider validation and evaluator ValueError/TimeoutError reject candidates.
+        Other failures propagate; initialization has a fixed generation budget.
+        Initial algorithms are evaluated first, stopping when the population is full.
         """
         init_attempts = 3 * population_size if init_attempts is None else init_attempts
         self.rng = random.Random(seed)
@@ -78,7 +87,7 @@ class AEL:
             {"session": session} if session is not None else {"provider": self.provider}
         )
         self.attempts, self.history = [], []
-        population = await self._initialize_population(population_size, init_attempts)
+        population = await self._initialize_population(population_size, init_attempts, initial)
         population = self._select_survivors(population, population_size)
         for generation in range(1, generations + 1):
             children = await self._generate_offspring(
@@ -87,8 +96,26 @@ class AEL:
             population = self._select_survivors(population + children, population_size)
         return population
 
-    async def _initialize_population(self, size: int, attempts: int) -> list[Individual]:
+    async def _initialize_population(
+        self, size: int, attempts: int, initial: Sequence[Proposal]
+    ) -> list[Individual]:
         population = []
+        for proposal in initial:
+            identifier = len(self.attempts) + 1
+            self.attempts.append(
+                {
+                    "id": identifier,
+                    "generation": 0,
+                    "operation": "seed",
+                    "parents": (),
+                    "proposal": proposal,
+                }
+            )
+            candidate = await self._score((identifier, proposal))
+            if candidate is not None:
+                population.append(candidate)
+            if len(population) == size:
+                return population
         for _ in range(attempts):
             candidate = await self._score(await self._create(self.initialization, [], 0))
             if candidate is not None:
@@ -143,6 +170,9 @@ class AEL:
             return record["id"], proposal
         except ValidationError as exc:
             record["error"] = f"{type(exc).__name__}: {exc}"
+            # Slick retains the failed parse as a pending conversation; the caller owns recovery.
+            if "session" in self.execution:
+                raise
             return None
         except Exception as exc:
             record["error"] = f"{type(exc).__name__}: {exc}"
@@ -158,7 +188,12 @@ class AEL:
             if not math.isfinite(fitness):
                 raise ValueError("fitness must be finite")
             record["fitness"] = fitness
-            return Individual(**proposal.model_dump(), id=identifier, fitness=fitness)
+            return Individual(
+                description=proposal.description,
+                content=proposal.content,
+                id=identifier,
+                fitness=fitness,
+            )
         except (ValueError, TimeoutError) as exc:
             record["error"] = f"{type(exc).__name__}: {exc}"
             return None

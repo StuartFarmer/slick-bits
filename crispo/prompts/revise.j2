@@ -1,0 +1,27 @@
+{# Adapted from amazon-science/CriSPO; Copyright Amazon.com, Inc. or its affiliates.
+   SPDX-License-Identifier: CC-BY-NC-4.0. See ../README.md for source and modifications. #}
+Your task is to optimize the instruction for this task: {{ instance.task }}
+
+Below are previous instructions with their training scores and critiques, ordered from lower to higher score.
+Primary metric: {{ instance.primary_metric }}. Higher is better.
+{% for item in trajectory %}
+<rated_instruction>
+<instruction>{{ item.text }}</instruction>
+<score>{{ item.score }}</score>
+<metrics>{{ item.metrics | tojson }}</metrics>
+<critique>{{ item.critique }}</critique>
+</rated_instruction>
+{% endfor %}
+
+Generate an instruction that is different from the instructions above and aims for a higher score.
+It should be concise, effective, and generally applicable to unseen inputs.
+
+1. Compare high-score instructions to low-score ones and synthesize their critiques and suggestions. List concise actionable improvements in <suggestion> tags.
+2. Apply the suggestions and draft a new instruction aiming for a higher score.
+3. Vary wording, paraphrase, placeholder positions, phrase order, grammar, and sentence order.
+4. Write your final new instruction in one nonempty <instruction>...</instruction> block.
+
+The template must contain each of these placeholders exactly once, and no others:
+{{ instance.placeholders | tojson }}
+Keep placeholders literal; the caller will supply the input, retrieved context or demonstrations.
+Do not copy reference answers or training-specific facts into the instruction.

@@ -1,0 +1,5 @@
+GENOTYPES FOUND IN ASCENDING ORDER OF QUALITY
+{% for ancestor in ancestors %}
+{{ loop.index }}. {{ ancestor }}
+{% endfor %}
+{{ ancestors | length + 1 }}.
