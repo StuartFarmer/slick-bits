@@ -1,0 +1,15 @@
+You are the final judge. Conclude the debate using the available candidates.
+
+{% include "context.j2" %}
+
+<answer_candidates>
+{{ candidates }}
+</answer_candidates>
+
+Summarize your reasons and give the final answer you think is correct for the
+task. The answer must be nonblank; this is the final decision, not another
+request for debate. Follow the final answer requirements.
+
+# Output Format
+Return only JSON matching this schema:
+{{ schema | tojson }}

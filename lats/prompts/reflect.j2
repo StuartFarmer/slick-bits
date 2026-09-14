@@ -1,0 +1,20 @@
+Diagnose this unsuccessful trial using the environment feedback and propose a
+concise plan to improve the next attempt. Identify the specific mistaken choice
+or missing information and a useful alternative. A depth limit means the trial
+was interrupted, not that its partial work was proven wrong. Return a few sentences
+of plain text; do not generate a replacement action or artifact.
+
+Task: {{ instance.task }}
+Action interface: {{ instance.actions }}
+Success criteria: {{ instance.criteria }}
+Initial observation: {{ instance.observation }}
+
+Trial:
+{% for step in node.trajectory %}
+Thought: {{ step.action.thought }}
+Action: {{ step.action.content }}
+Observation: {{ step.feedback.observation }}
+Reward: {{ step.feedback.reward }}
+{% endfor %}
+Trial end: {{ reason }}
+Backpropagated reward: {{ reward }}

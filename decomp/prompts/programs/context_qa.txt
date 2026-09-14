@@ -1,0 +1,15 @@
+QC: What awards have movies produced by people born in 1910 won?
+Q1: [qa] Who were born in 1910?
+#1: ["Teeplemole", "Muntaril"]
+Q2: (project_values_flat.unique) [qa] For which movies was #1 the producer?
+#2: ["Featsaw", "Zalate", "Premercy"]
+Q3: (project_values_flat.unique) [qa] Which awards were given to #2?
+#3: ["Zorgion", "Hallowcock", "Chowwurst"]
+Q4: [EOQ]
+
+QC: What movies have people from Stridery acted in?
+Q1: [qa] Who is from Stridery?
+#1: ["Gastrat"]
+Q2: (project_values_flat.unique) [qa] Which movies has #1 acted in?
+#2: ["Partnershipmaker", "Nilitude", "Warpstone"]
+Q3: [EOQ]

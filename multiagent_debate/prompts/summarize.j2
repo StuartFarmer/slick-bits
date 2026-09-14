@@ -1,0 +1,12 @@
+Summarize these responses to the original task concisely. Preserve the proposed answers,
+supporting arguments, and disagreements, including minority views. Do not resolve the
+debate or introduce new claims.
+
+Original task:
+{{ instance.task }}
+
+Responses:
+{% for response in peers %}
+
+One agent response: ```{{ response }}```
+{% endfor %}

@@ -2,11 +2,11 @@
 
 Reviewed 2026-09-14. The supplied example is treated as the user's preferred reference style. “State of the art” here is a design target, not an independently established benchmark result.
 
-This report describes the pre-migration baseline. The implementations have since been migrated to local prompt folders; see [migration validation](slick-style-validation.md#implementation-migration). The baseline inventory has been corrected from 19 to 17 prompt functions (six structured, eleven textual).
+This is the historical comparison made before the requested migrations. The active implementations now use problem-agnostic optimizer classes and local prompt folders; see [current verification](slick-style-validation.md). The earlier problem-specific source is preserved in the [legacy archive](../examples/legacy/README.md); source names and line numbers below refer to that baseline. The corrected baseline count is 17 prompt functions (six structured, eleven textual). Subsequent explicit requirements for classes, injected evaluation, and shared test providers are captured in the current guide.
 
 The implementations already share the reference's central philosophy: Slick generates; ordinary Python controls the algorithm. The largest opportunity is to make the generation boundary easier to read and review. External templates, explicit generated inputs, consistent response contracts, and clearer ownership would accomplish more than broad class conversions or additional workflow machinery.
 
-The resulting [development style guide](../skills/slick-development/references/style-guide.md) is bundled with the reusable [slick-development skill](../skills/slick-development/SKILL.md). The skill includes a runnable, offline [checked proposal example](../skills/slick-development/assets/checked_proposal.py) and its [Jinja template](../skills/slick-development/assets/prompts/heuristic/propose.j2).
+The resulting [development style guide](../skills/slick-development/references/style-guide.md) is bundled with the reusable [slick-development skill](../skills/slick-development/SKILL.md). The skill includes a problem-agnostic [checked proposal example](../skills/slick-development/assets/checked_proposal.py) and its [Jinja template](../skills/slick-development/assets/prompts/propose.j2).
 
 ## Scope and evidence
 
@@ -32,17 +32,17 @@ These counts describe choices, not quality scores. A raw-text mutation has no in
 
 ### 1. Model prose currently occupies the place of developer documentation
 
-[EoH's `propose`](../eoh/evolve.py) at line 51 contains a 26-line instruction docstring; [optimizer's `propose`](../optimizer/improve.py) at line 59 contains 42 lines. A reader sees task instructions, Jinja branches, and answer formatting before seeing the next Python operation. In the reference, the decorator names the template and output schema, while the body says what happens to the answer.
+EoH's `propose` (`eoh/evolve.py`, archived) at line 51 contains a 26-line instruction docstring; optimizer's `propose` (`optimizer/improve.py`, archived) at line 59 contains 42 lines. A reader sees task instructions, Jinja branches, and answer formatting before seeing the next Python operation. In the reference, the decorator names the template and output schema, while the body says what happens to the answer.
 
 This is a separation-of-audiences improvement: developers can review the Python contract while prompt authors can review the text that reaches the model. Jinja syntax is already present in all current prompts; externalization is mainly an organizational change, not a new templating technology.
 
-ReEvo has already separated prompt declarations into [prompts.py](../reevo/prompts.py), so its module structure is close to the target. The remaining step is separating instruction files from callable definitions. Avoid simply renaming that Python module into another large collection of embedded strings.
+ReEvo has already separated prompt declarations into prompts.py (`reevo/prompts.py`, archived), so its module structure is close to the target. The remaining step is separating instruction files from callable definitions. Avoid simply renaming that Python module into another large collection of embedded strings.
 
 ### 2. The reference makes postprocessing part of the public operation
 
 In `PaperPlanner.assess_method`, generation produces an `Assessment`, then `check_evidence` verifies that its quotations occur in the supplied paper. In `generate_plan`, generation produces a `Plan`, while the operation returns a `PaperPlan`. This exposes two different contracts directly in the signature and decorator.
 
-Current applications generally parse and check later. [LLM_GP's `Operators.request`](../llm_gp/operators.py) at line 169 receives a validation callback and a fallback callback. [ReEvo's `score`](../reevo/core.py) at line 160 parses source, evaluates it, and records failure in an `Individual`. [APEX's optimizer](../apex/apex.py) at line 191 checks mutation text inside the search loop.
+Current applications generally parse and check later. LLM_GP's `Operators.request` (`llm_gp/operators.py`, archived) at line 169 receives a validation callback and a fallback callback. ReEvo's `score` (`reevo/core.py`, archived) at line 160 parses source, evaluates it, and records failure in an `Individual`. APEX's optimizer (`apex/apex.py`, archived) at line 191 checks mutation text inside the search loop.
 
 Putting a local acceptance check in a decorated body can reduce distance between a generated value and its meaning. However, moving an existing check changes which caller sees the error. EoH's worker currently handles code validation; moving it into `propose` could change `evaluation.error` records into generation errors and stop an injected evaluator from receiving the same inputs. An extraction-only refactor must preserve this behavior.
 
@@ -52,7 +52,7 @@ The target rule is therefore “make the boundary explicit,” not “move every
 
 The reference's `Text` alias strips whitespace and requires nonblank text. Its objects forbid unknown keys, list cardinalities express requirements, and `ReviewDecision` has a cross-field invariant. These make the output contract readable without searching for validation elsewhere.
 
-[EoH's `Proposal`](../eoh/evolve.py) at line 33 already forbids extra keys and strips/rejects blank fields using a validator. Replacing it with an `Annotated` alias would primarily centralize a repeated rule; the existing implementation is not unvalidated. By contrast, [optimizer's `Proposal`](../optimizer/improve.py) at line 16 and [LLM_GP's models](../llm_gp/operators.py) at lines 16–30 do not consistently forbid extra keys or constrain every text item. LLM_GP deliberately uses strict validation for choice IDs.
+EoH's `Proposal` (`eoh/evolve.py`, archived) at line 33 already forbids extra keys and strips/rejects blank fields using a validator. Replacing it with an `Annotated` alias would primarily centralize a repeated rule; the existing implementation is not unvalidated. By contrast, optimizer's `Proposal` (`optimizer/improve.py`, archived) at line 16 and LLM_GP's models (`llm_gp/operators.py`, archived) at lines 16–30 do not consistently forbid extra keys or constrain every text item. LLM_GP deliberately uses strict validation for choice IDs.
 
 AEL's tagged description plus fenced code, EvoPROMPT's `<prompt>` extraction, and ReEvo's code/prose outputs encode current experimental interfaces. Changing these to JSON would change model instructions and parsing, not just Python style. Internal frozen configuration dataclasses in AEL, APEX, and ReEvo remain a good fit.
 
@@ -62,7 +62,7 @@ Adopt closed models and reusable constraints for new structured boundaries. Revi
 
 `PaperPlanner` owns the paper and provider and groups related assessment, planning, and revision methods. Its `run` expresses the order of work without command-line or file-management details. The complete example places CLI and report formatting outside that class.
 
-The current projects have different degrees of separation. [ReEvo](../reevo/core.py) already owns its task, providers, population, RNG, reflections, and run lifecycle in one class. [EvoPROMPT](../evoprompt/evoprompt.py) and [APEX](../apex/apex.py) expose algorithm functions with injected evaluators; this is useful separation. [QUBE's run module](../qube/run.py), [AEL's main module](../ael/ael.py), and [EoH's evolve module](../eoh/evolve.py) combine more of provider construction, prompt definition, execution setup, logging, and CLI work.
+The current projects have different degrees of separation. ReEvo (`reevo/core.py`, archived) already owns its task, providers, population, RNG, reflections, and run lifecycle in one class. EvoPROMPT (`evoprompt/evoprompt.py`, archived) and APEX (`apex/apex.py`, archived) expose algorithm functions with injected evaluators; this is useful separation. QUBE's run module (`qube/run.py`, archived), AEL's main module (`ael/ael.py`, archived), and EoH's evolve module (`eoh/evolve.py`, archived) combine more of provider construction, prompt definition, execution setup, logging, and CLI work.
 
 Move genuinely separate application plumbing toward `run.py` and preserve pure algorithm modules. Introduce a class only when its shared state or lifecycle helps explain the code. Do not wrap every existing free function in a one-method class to resemble the example.
 
@@ -116,7 +116,7 @@ Formatting is worth standardizing, but it is not the primary problem. Avoid broa
 | EvoPROMPT | Typed public optimizer, frozen generations, explicit tagged-text extraction | Externalize GA, DE, variation, and answer templates | Ordered operator steps, single tagged answer, tie rules, held-out separation |
 | Scout | Workflow-based retrieval and existing human selection | Apply prose/format guidance when touching relevant code | HTTP concurrency, cancellation, database state, local selection semantics |
 
-These are future migration suggestions. This delivery changes documentation and adds the skill example; it does not refactor the algorithms.
+These were the initial migration suggestions. The later implementation and problem-agnostic redesign requests superseded them; see the current guide and validation record.
 
 ## What to adopt from the reference, and what to qualify
 
@@ -138,4 +138,4 @@ The supporting guide also checked the official [Pydantic validation-decorator do
 
 ## Delivery validation
 
-The comparison inventory and scoped Ruff diagnostic above were executed. The accompanying skill and example receive structural, deterministic runtime, and independent application checks; their results are recorded in [the validation note](slick-style-validation.md). Existing algorithm tests were inspected for migration invariants, but the full algorithm suites and paid model experiments are outside this documentation change.
+The comparison inventory and scoped Ruff diagnostic above were executed. The accompanying skill and example receive structural, deterministic runtime, and independent application checks; their results are recorded in [the validation note](slick-style-validation.md). The initial documentation review did not run the full algorithm suites or paid model experiments. Later implementation validation is recorded separately in that note.

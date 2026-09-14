@@ -1,0 +1,13 @@
+QC: What is the letter at position 1 in "Augusta"?
+Q1: [split] What are the letters and their positions in "Augusta"?
+#1: [["A", 1], ["u", 2], ["g", 3], ["u", 4], ["s", 5], ["t", 6], ["a", 7]]
+Q2: [arr_position] What is at position 1 in #1?
+#2: "A"
+Q3: [EOQ]
+
+QC: What is the last letter in "Mathison"?
+Q1: [split] What are the letters in "Mathison"?
+#1: ["M", "a", "t", "h", "i", "s", "o", "n"]
+Q2: [arr_position] What is at the last position in #1?
+#2: "n"
+Q3: [EOQ]

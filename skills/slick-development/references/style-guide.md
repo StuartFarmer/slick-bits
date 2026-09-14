@@ -12,22 +12,36 @@ Use domain verbs such as `propose`, `assess_method`, `reflect_pair`, `revise`, a
 
 Arrange a small module as a concise module docstring, imports, aliases/constants, data contracts, pure checks, related operations, and entrypoint glue. Split cohesive responsibilities when they already have different dependencies or lifecycles. Do not create a module for every class.
 
-A useful starting layout is:
+For this repository, each optimizer is a class with an explicit async `run()` loop,
+following the supplied `PaperPlanner` shape. Keep the order of generation, evaluation, selection,
+and acceptance visible through named phase methods called by that loop. Related prompt methods share the task and
+provider through the class. Numerical helpers can remain ordinary functions.
 
 ```text
 algorithm/
-    core.py                    # selection, budgets, state transitions, pure math
-    operators.py               # related decorated operations and their checks
-    run.py                     # configuration, providers, files, command line
+    __init__.py                # public agent and result exports
+    agent.py                   # contracts, prompt methods, and async run loop
     prompts/
         propose.j2
         revise.j2
+tests/
+    providers.py               # the single shared scripted test provider
     test_algorithm.py
 ```
 
-This is a default, not a mandatory file count. A small `algorithm.py` and a `prompts/` directory can be sufficient. Keep workers or evaluators separate where execution isolation requires it. Shared provider construction belongs at the application boundary; create a shared CLI helper only when the applications actually share its policy.
+The constructor accepts task context, a provider, and an async evaluator. Candidate
+content is generic text; the task and evaluator define what it means. Algorithms
+may require additional meaningful callbacks: embeddings for APEX, behavior
+signatures for QUBE. Keep score direction, finite-score checks, attempt budgets,
+and population decisions inside the agent.
 
-Use a class when methods share meaningful context or a run lifecycle, as `PaperPlanner` shares a paper or `ReEvo` owns one evolving population. Independent generation functions and numerical helpers can remain functions. A class should make ownership clearer; a one-method forwarding object usually does not.
+Benchmark data, code execution, Docker workers, provider construction, persistence,
+and CLI demos belong outside these implementations. The caller's evaluator owns
+any required execution isolation; removing infrastructure from the agent does not
+justify executing generated code in-process. Existing infrastructure is preserved
+in the repository's legacy archive. Keep the shared dummy provider exclusively in
+tests, including tests of the bundled skill example. Do not add a shared base class
+or generic orchestration framework just to make algorithm APIs identical.
 
 ## 2. Put model-facing prose in Jinja files
 
@@ -38,11 +52,11 @@ Templates should normally contain, in order:
 1. A direct task instruction.
 2. The task interface and constraints that affect the answer.
 3. Delimited source material, parents, or prior results.
-4. The requested response contract, including `{{ output_format }}` for structured decorated calls.
+4. The requested response contract, including an explicit JSON instruction and `{{ schema | tojson }}` for structured decorated calls.
 
 Lead with verbs: “Compare these heuristics and propose one revision.” Role declarations such as “You are an expert” belong only where the experiment requires them. Use sentence case and short paragraphs. Keep uppercase emphasis for a concrete ambiguity, rather than treating it as the default voice.
 
-Use `{{ value }}`, `{% if condition %}`, and `{% for item in items %}` consistently. Keep Jinja branches about presentation and operation-specific instructions; sampling, scoring, validation, retries, and acceptance remain Python decisions. Use `.model_dump() | tojson` for Pydantic data that should be serialized as JSON. Do not call model methods on plain dictionaries or dataclasses.
+Use `{{ value }}` and `{% for item in items %}` for supplied data. Choose operations in Python, with a separate decorated method and prompt file for each: initialization, crossover, and mutation must not share a template that switches on `stage`. Keep Jinja free of `if`/`elif`/`else` and conditional expressions. Guided and unguided instructions also use separate files. Compute small display values such as score direction in Python; normalize optional data before rendering. Do not move entire prompt instructions into Python strings to avoid a template branch. Use `.model_dump() | tojson` for Pydantic data that should be serialized as JSON. Do not call model methods on plain dictionaries or dataclasses.
 
 State which material is task data, the required output, and the limits of what was done. A prompt may request deterministic code or forbid execution, but those instructions do not establish execution isolation. Preserve evaluator controls separately.
 
@@ -55,7 +69,7 @@ In the checked Slick API:
 - `self` is exposed as `instance` in a decorated method's template: `{{ instance.paper }}`. Jinja reserves `self` for its own template object.
 - Function inputs and their defaults become template variables. `generated`, `provider`, and `session` are reserved; do not provide them as template inputs.
 - `slick.prompts.TEMPLATE_ROOT` defaults to `Path("prompts")`, relative to the working directory. Template files, includes, and imports resolve under that root at render time.
-- The loader uses `StrictUndefined`: missing variables should fail loudly. Test every meaningful branch so an unvisited branch does not hide a typo.
+- The loader uses `StrictUndefined`: missing variables should fail loudly. Render every operation template so an unused file does not hide a typo.
 
 For a standalone application with the layout above, set the root once during startup, before any render or provider call:
 
@@ -72,12 +86,12 @@ This is application configuration, not something to repeat in each decorated ope
 For an async decorated method, render with the owner explicitly supplied:
 
 ```python
-text = await HeuristicDesigner.propose.render(designer, feedback)
+text = await ProposalDesigner.propose.render(designer, feedback)
 ```
 
 In this implementation, `.render` is attached to the function and is not automatically bound through `designer.propose.render(...)`. An explicit render helper can hide this detail if callers need it. Test preserved `.render` entry points when replacing free functions with methods.
 
-`Prompt("report.j2")` is a renderer, not a provider call. `.render(...)` on a decorated function renders without calling the provider or postprocessing body. Neither operation proves that generated output will pass domain validation. The decorator adds structured output instructions when needed; the plain `Prompt` renderer does not automatically add that decorated-call block.
+`Prompt("report.j2")` is a renderer, not a provider call. `.render(...)` on a decorated function renders without calling the provider or postprocessing body. Neither operation proves that generated output will pass domain validation. The structured decorator supplies a `schema` template variable. Include its JSON explicitly; automatic output-instruction behavior has varied between local revisions. The plain `Prompt` renderer does not supply a schema.
 
 ## 4. Separate input, generated, and domain contracts
 
@@ -85,7 +99,7 @@ There are three boundaries:
 
 | Boundary | Responsibility | Example |
 | --- | --- | --- |
-| Caller input | Reject unusable inputs before generation | Nonblank feedback, valid operation, positive budget |
+| Caller input | Trust annotations; native operations report incompatible values | `range()` requires an integer; scoring invokes the evaluator |
 | Generated output | Validate the representation | JSON fields, nonblank text, list cardinality, decision literals |
 | Domain acceptance | Check what the representation means locally | Quote provenance, expression grammar, known IDs, candidate interface |
 
@@ -93,7 +107,7 @@ For a structured model result, always declare `output_type=...`. Slick does not 
 
 The checked decorator treats a body result of `None` or `Ellipsis` as “return the generated value.” It therefore cannot use `return None` to signal rejection. Raise a suitable exception, return an explicit result type, or handle rejection in an ordinary orchestration function. The reference's undecorated generation orchestrator and workflow review have different return semantics from a prompt body.
 
-Use Pydantic for runtime input/output contracts. For new closed response objects, prefer `class Proposal(BaseModel, extra="forbid")`. The equivalent `ConfigDict(extra="forbid")` remains valid; changing spelling alone is cosmetic. `extra="forbid"` does not imply strict type coercion. Add strict constraints when coercion would be incorrect, for example integer IDs that must not accept booleans or numeric strings.
+Use Pydantic for structured generated output contracts. Avoid validating every internal or caller-supplied value again. For new closed response objects, prefer `class Proposal(BaseModel, extra="forbid")`. The equivalent `ConfigDict(extra="forbid")` remains valid; changing spelling alone is cosmetic. `extra="forbid"` does not imply strict type coercion. Add strict constraints when coercion would be incorrect, for example integer IDs that must not accept booleans or numeric strings.
 
 Reuse constrained text types for prose:
 
@@ -105,7 +119,21 @@ List length and item validity are separate constraints: `Field(min_length=1)` on
 
 Use a model validator for relationships between fields, such as requiring feedback for a `revise` decision. Keep state-dependent checks in ordinary Python: evidence against a particular paper, selected IDs against this population, or a function against this task signature.
 
-The decorated body runs **after** generation and parsing. Input checks there are too late to prevent a provider call. Use a constructor, a validating outer function, or `@validate_call` placed outside `@prompt`. Verify that decorator composition accepts the intended signature and blocks invalid inputs before the provider runs. Pydantic validates arguments and can coerce them; it does not validate returns by default. See the [official validation decorator documentation](https://docs.pydantic.dev/latest/concepts/validation_decorator/).
+Assume the caller supplies the annotated types. Do not surround ordinary inputs
+with `isinstance`, exact `type`, or `callable` checks, and do not replace those
+checks with blanket `@validate_call` decorators. Let indexing, arithmetic, method
+calls, and provider/evaluator invocation report incompatible values where they
+are used. This includes configuration values: do not check positivity, ranges,
+probabilities, or finiteness of caller-supplied settings in constructors, Config
+validators, or run preambles. Assume usable settings. Runtime budget accounting,
+measured fitness, generated IDs, and immutable edit boundaries remain algorithm
+behavior. Prefer explicit conversion or separate entry points for different
+input formats instead of adding `isinstance` branches to the agent.
+
+The decorated body runs **after** generation and parsing; its checks concern the
+generated result, not preflight validation of caller configuration. Do not catch programming errors broadly
+and turn them into retryable candidate failures; catch only the rejection classes
+the algorithm intentionally handles.
 
 Keep genuinely textual outputs as `str`: a ReEvo reflection or a paper-specified tagged instruction need not become a JSON object. Internal immutable configuration and numerical state may remain dataclasses, tuples, arrays, or dictionaries. Types should explain a boundary, not force every object through serialization.
 
@@ -125,7 +153,15 @@ Log raw responses at a boundary that still sees them when parsing or postprocess
 
 ## 6. Express orchestration with ordinary control flow
 
-Keep selection, generation, scoring, acceptance, and revision visible as sequential Python steps. Short nested functions are useful when they share one run's counters or cache. Extract a collaborator when a distinct policy or lifecycle makes the enclosing function hard to follow.
+Make `run()` read as a short sequence of phases: initialize, select parents,
+reflect, generate offspring, assess, and replace. Extract cohesive methods for
+those phases when loops grow. Keep their algorithm order visible in `run()`;
+do not simply rename the large loop to `_run` or spread trivial assignments
+across helpers. Related state can stay on the owning class. Avoid extra base
+classes, strategy frameworks, and bundles of configuration solely for extraction.
+
+Use a fresh agent instance for a run when that is its documented lifecycle.
+Do not add a `started` guard merely to enforce happy-path usage.
 
 Parallelize only independent work. The reference uses `gather(..., return_exceptions=True)` to let both assessments finish before raising the first encountered failure in result order. This is a deliberate failure policy, not a default for every loop. Choose and test whether siblings finish or are cancelled. Do not introduce concurrency that changes RNG consumption, population snapshots, ordered logs, or immediate beam updates during a style migration.
 
@@ -160,7 +196,7 @@ The adjacent Slick project uses Ruff, a 100-character line limit, and Python 3.1
 
 Before editing, record the current render output and public call behavior. For extraction-only work, compare text across every meaningful branch. For an intentional prompt rewrite, check the new contract and report the behavioral change rather than asserting equivalence.
 
-Use deterministic scripted providers to verify valid generation, malformed structured output, domain rejection, and pre-generation input rejection. Exercise external templates from supported working directories and installed layouts. Cover method binding and any public `.render` facade.
+Use the shared scripted provider to verify valid generation, malformed structured output, candidate rejection, and downstream exception propagation. Exercise external templates from supported working directories and installed layouts. Cover method binding and any public `.render` facade.
 
 Run the existing tests that protect the affected algorithm: fixed budgets, invalid-candidate accounting, selection direction, elitism, tie handling, seeded randomness, snapshot semantics, mutation constraints, finite scores, held-out data separation, and evaluator cleanup. Add checks for a new behavior only where existing coverage does not establish it.
 
@@ -168,6 +204,10 @@ Do not replace isolated evaluators with direct execution to shorten an example. 
 
 ## 10. A complete reference boundary
 
-The bundled [Python example](../assets/checked_proposal.py) and [external template](../assets/prompts/heuristic/propose.j2) demonstrate constrained generated data, input validation before generation, a class with shared task context, an ordinary domain check, and explicit provider injection. Run the Python file with an environment containing Slick and Pydantic; its demo uses a canned response and never executes generated source. It intentionally strips outer whitespace from generated code, as EoH currently does; use a separate source contract when exact artifact bytes must be retained.
+The bundled [Python example](../assets/checked_proposal.py) and [local template](../assets/prompts/propose.j2) demonstrate a problem-agnostic optimizer class, constrained generated data, trusted caller inputs, an injected async evaluator, and a visible revision loop. Proposal and revision use separate prompt methods and templates. Its `run()` retains strict improvements according to the measured score. No provider is constructed in the example; tests inject the shared scripted provider.
 
-This example defines a new, deliberately narrow `priority(item, bins)` declaration contract. Its AST check does not resolve runtime name binding: later reassignment, deletion, or another kind of definition can still change what the name refers to. It does not establish return-value properties, safety, or fitness. It does not reproduce a paper or replace EoH's existing worker validation. Moving EoH's checks into this shape would change when failures occur, their logs, and what injected evaluators see; that requires an explicit behavioral migration.
+Configure the example's adjacent `prompts/` directory before use. The example
+propagates generation and evaluation errors and leaves retries to the caller.
+It deliberately strips surrounding whitespace from candidate prose; use a separate
+content contract if exact artifact bytes matter. It demonstrates a development
+pattern, not a domain-specific validator or an optimization-performance claim.

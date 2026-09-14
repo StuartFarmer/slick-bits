@@ -1,0 +1,11 @@
+Solve the arithmetic word problem. Return a short calculation and its result as text.
+
+Q: There were 15 trees. Now there are 21. How many were planted?
+A: "21 - 15 = 6 trees planted."
+Q: Leah had 32 chocolates and her sister had 42. They ate 35. How many remain?
+A: "32 + 42 = 74; 74 - 35 = 39 chocolates remain."
+Q: Olivia has 23 dollars and buys five bagels for 3 dollars each. How much remains?
+A: "5 * 3 = 15; 23 - 15 = 8 dollars remain."
+
+Q: {{ question }}
+Return JSON with the calculation text in answer, matching {{ schema | tojson }}.

@@ -1,0 +1,15 @@
+Act as an expert in the task's domain. Compare the active trees' proposed solutions,
+supporting justifications, and final answers against the original task and criteria.
+Select the most accurate existing candidate by its one-based position. Do not invent
+a new answer. Agreement and confident wording alone do not establish correctness.
+
+<task>{{ instance.task }}</task>
+Evaluation criteria: {{ instance.criteria }}
+Final answer requirements: {{ instance.answer_format }}
+{% for candidate in candidates %}
+Candidate {{ loop.index }}: {{ candidate.model_dump() | tojson }}
+{% endfor %}
+
+# Output Format
+Return only JSON matching this schema:
+{{ schema | tojson }}

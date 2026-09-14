@@ -1,0 +1,12 @@
+Assess the similarity of two reasoning steps for the task. Estimate the fraction
+of shared meaningful words, quantities and facts, from 0 to 1. Pay attention to
+the resulting state: changed numbers, negations or constraints can make similar
+wording incompatible. A high score permits borrowing a successor of the second
+step to continue the first step.
+
+<task>{{ instance.task }}</task>
+<first_step>{{ left }}</first_step>
+<second_step>{{ right }}</second_step>
+
+# Output Format
+Return only JSON matching this schema: {{ schema | tojson }}

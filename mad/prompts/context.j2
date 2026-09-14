@@ -1,0 +1,15 @@
+<task>
+{{ instance.task }}
+</task>
+
+Evaluation criteria: {{ instance.criteria }}
+Final answer requirements: {{ instance.answer_format }}
+There are two debaters. The debate limit is {{ instance.max_rounds }} rounds.
+
+<debate_history>
+{% for turn in instance.turns %}
+Round {{ turn.round }}, {{ turn.speaker }} side:
+{{ turn.content }}
+
+{% endfor %}
+</debate_history>

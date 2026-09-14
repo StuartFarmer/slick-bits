@@ -1,0 +1,33 @@
+Choose one next action toward completing the task, using the observed feedback
+and lessons from earlier failed trials. Supply a short thought explaining the
+decision and the action itself. Do not invent an environment observation or claim
+success: the environment evaluates the action. A reasoning step may itself be an
+action when allowed by the task interface.
+
+Task: {{ instance.task }}
+Action interface: {{ instance.actions }}
+Success criteria: {{ instance.criteria }}
+Initial observation: {{ instance.observation }}
+
+Current trajectory:
+{% for step in node.trajectory %}
+Thought: {{ step.action.thought }}
+Action: {{ step.action.content }}
+Observation: {{ step.feedback.observation }}
+Reward: {{ step.feedback.reward }}
+{% endfor %}
+
+Earlier failed trials and lessons:
+{% for failure in instance.memory %}
+{% for step in failure.trajectory %}
+Action: {{ step.action.content }}
+Observation: {{ step.feedback.observation }}
+{% endfor %}
+Trial reward: {{ failure.reward }}
+Trial end: {{ failure.reason }}
+Reflection: {{ failure.text }}
+{% endfor %}
+
+Return one JSON object matching this schema. Put only the executable command,
+reasoning step, or candidate artifact in content, as required by the action interface.
+{{ schema | tojson }}

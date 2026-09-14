@@ -1,0 +1,13 @@
+Critically assess this candidate against the original task. Identify concrete flaws,
+unsupported assumptions, and inconsistencies; give actionable correction feedback.
+Score its quality and prospect of success from 0 to 1, with higher being better.
+Separately estimate confidence in its correctness from 0 to 1. These are estimates,
+not measured token probabilities or proof of correctness. Use valid=false for a
+broken or unusable candidate. A useful unfinished solution can still be valid.
+
+{% include "context.j2" %}
+<candidate>{{ candidate.model_dump() | tojson }}</candidate>
+
+# Output Format
+Return only JSON matching this schema:
+{{ schema | tojson }}

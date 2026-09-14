@@ -1,0 +1,14 @@
+Task:
+{{ instance.task }}
+
+Select two parent IDs. Repeated IDs are allowed for parent selection.
+{{ instance.score_direction }} scores are better.
+
+Candidates:
+{% for item in population %}
+{{ {"id": loop.index0, "content": item.content, "score": item.score} | tojson }}
+{% endfor %}
+
+# Output Format
+Return JSON matching this schema:
+{{ schema | tojson }}

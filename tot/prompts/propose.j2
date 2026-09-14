@@ -1,0 +1,16 @@
+Propose up to {{ count }} distinct alternatives for the next thought.
+Each alternative continues the same partial solution; these are siblings, not consecutive steps.
+Return an empty thoughts list when no viable continuation exists.
+
+Task:
+{{ instance.task }}
+
+Thought granularity and requirements:
+{{ instance.thought }}
+
+Previous thoughts (ordered JSON array):
+{{ state.thoughts | tojson }}
+
+# Output Format
+Return only JSON matching this schema:
+{{ schema | tojson }}

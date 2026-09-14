@@ -1,0 +1,11 @@
+Generate one possible next thought that advances the task from the supplied partial solution.
+Return only the new thought, without repeating earlier steps or listing alternatives.
+
+Task:
+{{ instance.task }}
+
+Thought granularity and requirements:
+{{ instance.thought }}
+
+Previous thoughts (ordered JSON array):
+{{ state.thoughts | tojson }}

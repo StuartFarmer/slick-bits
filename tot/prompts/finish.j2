@@ -1,0 +1,11 @@
+Produce the final answer using the selected partial solution.
+Return only the requested artifact, without a search trace or discussion of alternatives.
+
+Task:
+{{ instance.task }}
+
+Selected thoughts (ordered JSON array):
+{{ state.thoughts | tojson }}
+
+Answer requirements:
+{{ instance.answer_format }}

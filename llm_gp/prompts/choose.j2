@@ -1,7 +1,0 @@
-Operation: {{ operation }}.
-Examples of high quality elements, ordered best first: {{ samples | tojson }}
-Select {{ count }} high quality elements from {{ individuals | tojson }}.
-Fitness is measured mean squared error: LOWER is better; null is invalid/worst.
-Return only the integer IDs of existing elements, best first.
-{% if operation != 'selection' %}Do not repeat IDs.{% else %}Repeated IDs are allowed.{% endif %}
-Do not modify expressions or fitness. Do not execute code or use tools.

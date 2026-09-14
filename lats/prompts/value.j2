@@ -1,0 +1,33 @@
+Estimate the prospect of successfully completing the task from this trajectory.
+Use the latest action and actual environment observation as evidence. An incomplete
+trajectory can be promising even when it does not yet contain a final answer.
+Apply lessons from earlier failed trials. Return a score from 0 (unpromising) to
+1 (highly promising). This is a heuristic assessment, not a declaration of success.
+Do not generate another action.
+
+Task: {{ instance.task }}
+Action interface: {{ instance.actions }}
+Success criteria: {{ instance.criteria }}
+Initial observation: {{ instance.observation }}
+
+Current trajectory:
+{% for step in node.trajectory %}
+Thought: {{ step.action.thought }}
+Action: {{ step.action.content }}
+Observation: {{ step.feedback.observation }}
+Reward: {{ step.feedback.reward }}
+{% endfor %}
+
+Earlier failed trials and lessons:
+{% for failure in instance.memory %}
+{% for step in failure.trajectory %}
+Action: {{ step.action.content }}
+Observation: {{ step.feedback.observation }}
+{% endfor %}
+Trial reward: {{ failure.reward }}
+Trial end: {{ failure.reason }}
+Reflection: {{ failure.text }}
+{% endfor %}
+
+Return one JSON object matching this schema:
+{{ schema | tojson }}

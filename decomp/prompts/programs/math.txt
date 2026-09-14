@@ -1,0 +1,13 @@
+QC: There were 15 trees. Now there are 21. How many were planted?
+Q1: [cot] There were 15 trees. Now there are 21. How many were planted?
+#1: "21 - 15 = 6 trees planted."
+Q2: [gpt_ans] #1
+#2: 6
+Q3: [EOQ]
+
+QC: Olivia has 23 dollars and buys five bagels for 3 dollars each. How much remains?
+Q1: [cot] Olivia has 23 dollars and buys five bagels for 3 dollars each. How much remains?
+#1: "5 * 3 = 15; 23 - 15 = 8 dollars remain."
+Q2: [gpt_ans] #1
+#2: 8
+Q3: [EOQ]

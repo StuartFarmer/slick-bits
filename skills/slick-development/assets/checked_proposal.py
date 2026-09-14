@@ -1,73 +1,51 @@
-"""Generate a heuristic proposal and check its declared interface without executing it."""
+"""Propose a candidate and revise it using caller-supplied feedback and evaluation."""
 
-import ast
-import asyncio
-from pathlib import Path
+from collections.abc import Awaitable, Callable, Sequence
 from typing import Annotated
 
-from pydantic import BaseModel, StringConstraints, validate_call
-from slick import prompt, prompts
+from pydantic import BaseModel, Field, StringConstraints
+from slick import Session, prompt
 
 Text = Annotated[str, StringConstraints(strip_whitespace=True, min_length=1)]
 
 
 class Proposal(BaseModel, extra="forbid"):
-    thought: Text
-    code: Text
+    description: Text
+    content: Text
 
 
-def check_interface(code: str) -> None:
-    """Check the declared signature; runtime binding, output behavior, and safety are unchecked."""
-    tree = ast.parse(code)
-    compile(tree, "<proposal>", "exec")
-    functions = [
-        node for node in tree.body if isinstance(node, ast.FunctionDef) and node.name == "priority"
-    ]
-    if len(functions) != 1 or functions[0].decorator_list:
-        raise ValueError("define exactly one undecorated priority function")
-    args = functions[0].args
-    if (
-        [arg.arg for arg in args.args] != ["item", "bins"]
-        or args.posonlyargs
-        or args.kwonlyargs
-        or args.defaults
-        or args.vararg
-        or args.kwarg
-    ):
-        raise ValueError("priority must accept exactly item and bins, without defaults")
+class Assessment(BaseModel, extra="forbid"):
+    proposal: Proposal
+    score: float = Field(allow_inf_nan=False)
 
 
-class HeuristicDesigner:
-    """Keep task context across proposals; the caller owns evaluation and retries."""
+class ProposalDesigner:
+    """Keep task context; the caller owns evaluation and provider retries."""
 
-    @validate_call
-    def __init__(self, task: Text):
+    def __init__(self, task: str, provider, evaluate: Callable[[str], Awaitable[float]]):
         self.task = task
+        self.provider = provider
+        self.evaluate = evaluate
 
-    @validate_call
-    @prompt(template="heuristic/propose.j2", output_type=Proposal)
-    async def propose(self, feedback: Text, *, generated: Proposal) -> Proposal:
-        """Validate feedback before generation, then check the generated function interface."""
-        check_interface(generated.code)
+    @prompt(template="propose.j2", output_type=Proposal)
+    async def propose(self, feedback: str, *, generated: Proposal) -> Proposal:
         return generated
 
+    @prompt(template="revise.j2", output_type=Proposal)
+    async def revise(self, draft: Proposal, feedback: str, *, generated: Proposal) -> Proposal:
+        return generated
 
-class DemoProvider:
-    """Return one canned proposal; no model reasoning or candidate execution."""
+    async def assess(self, proposal: Proposal) -> Assessment:
+        return Assessment(proposal=proposal, score=await self.evaluate(proposal.content))
 
-    async def acall(self, context):
-        return Proposal(
-            thought="Prefer the feasible bin with the least remaining capacity.",
-            code="def priority(item, bins):\n    return [-capacity for capacity in bins]\n",
-        ).model_dump_json(), []
-
-
-async def main() -> None:
-    prompts.TEMPLATE_ROOT = Path(__file__).resolve().parent / "prompts"
-    designer = HeuristicDesigner("Assign an item to a feasible bin; higher priority wins.")
-    proposal = await designer.propose("Use a deterministic heuristic.", provider=DemoProvider())
-    print(proposal.model_dump_json(indent=2))
-
-
-if __name__ == "__main__":
-    asyncio.run(main())
+    async def run(self, feedback: Sequence[str], *, session: Session | None = None) -> Assessment:
+        """Propose, assess, and revise; retain strict score improvements."""
+        first, *revisions = feedback
+        execution = {"session": session} if session is not None else {"provider": self.provider}
+        best = await self.assess(await self.propose(first, **execution))
+        for message in revisions:
+            proposal = await self.revise(best.proposal, message, **execution)
+            assessment = await self.assess(proposal)
+            if assessment.score > best.score:
+                best = assessment
+        return best

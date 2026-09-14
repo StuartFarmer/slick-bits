@@ -1,0 +1,12 @@
+Revise this candidate for the task:
+{{ instance.task }}
+
+Candidate:
+{{ draft.model_dump() | tojson }}
+
+Feedback:
+{{ feedback }}
+
+# Output Format
+Return JSON matching this schema:
+{{ schema | tojson }}

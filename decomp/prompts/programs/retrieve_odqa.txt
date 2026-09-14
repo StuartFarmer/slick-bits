@@ -1,0 +1,6 @@
+QC: Which company manufactured Lost Gravity?
+Q1: [retrieve] Which company manufactured Lost Gravity?
+#1: [{"title": "Lost Gravity", "text": "Lost Gravity was manufactured by Mack Rides."}]
+Q2: [singlehop_qa] Documents: #1 Question: Which company manufactured Lost Gravity?
+#2: {"answer": "Mack Rides", "documents": [{"title": "Lost Gravity", "text": "Lost Gravity was manufactured by Mack Rides."}]}
+Q3: [EOQ]

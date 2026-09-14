@@ -1,0 +1,12 @@
+Correct this uncertain candidate using the feedback and relevant prior knowledge.
+Recheck constraints and repair mistakes throughout its content. Return the complete
+replacement candidate with concise justification. Preserve a complete candidate's
+final answer field, updating its value as needed; unfinished work may use answer=null.
+
+{% include "context.j2" %}
+<candidate>{{ candidate.model_dump() | tojson }}</candidate>
+<feedback>{{ feedback }}</feedback>
+
+# Output Format
+Return only JSON matching this schema:
+{{ schema | tojson }}

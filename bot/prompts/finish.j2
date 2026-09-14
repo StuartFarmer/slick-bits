@@ -1,0 +1,21 @@
+Produce the final answer or artifact requested by the task, using the last chain
+and the accumulated trial-and-error experience. Correct identified mistakes and
+complete missing work. Check the full task, since model scores and prior feedback
+can be wrong. Follow the task's requested output format. If unresolved, make the
+remaining uncertainty explicit rather than claiming a verified solution.
+
+<task>{{ instance.task }}</task>
+<experience>
+{% for experience in instance.experiences %}
+Historical chain {{ loop.index }}:
+{% for step in experience.chain %}
+{{ loop.index }}. {{ step.text }} [node={{ step.node }}, edge={{ step.edge }}]
+{% endfor %}
+Feedback: {{ experience.feedback }}
+{% endfor %}
+</experience>
+<last_chain>
+{% for step in chain %}
+{{ loop.index }}. {{ step.text }} [node={{ step.node }}, edge={{ step.edge }}]
+{% endfor %}
+</last_chain>

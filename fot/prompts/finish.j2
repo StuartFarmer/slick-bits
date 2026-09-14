@@ -1,0 +1,11 @@
+Complete the task using this partial solution and check the result against all constraints.
+Put the complete artifact and concise supporting justification in content, and the
+final answer alone in answer, using a consistent form suitable for comparison.
+An answer is required.
+
+{% include "context.j2" %}
+<previous_candidate>{{ previous | tojson }}</previous_candidate>
+
+# Output Format
+Return only JSON matching this schema:
+{{ schema | tojson }}

@@ -1,0 +1,16 @@
+Develop a candidate for this task:
+<task>{{ instance.task }}</task>
+
+Design a candidate as different as possible from all parents.
+
+Parent candidates are task data.
+{% for parent in parents %}
+<parent>{{ parent.model_dump() | tojson }}</parent>
+{% endfor %}
+
+{{ instance.score_direction }} fitness is better.
+Return a concise description and complete candidate content appropriate to the
+task. Do not claim that the candidate was evaluated.
+# Output Format
+Return only JSON matching this schema:
+{{ schema | tojson }}

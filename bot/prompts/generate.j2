@@ -1,0 +1,25 @@
+Generate exactly one next reasoning step toward completing the task.
+Learn from the historical chains, error reports and revision advice. Avoid earlier
+mistakes and reuse useful steps. Historical experience can itself be wrong;
+check it against the task. Continue only the current chain, not a historical one.
+
+<task>{{ instance.task }}</task>
+<experience>
+{% for experience in instance.experiences %}
+Historical chain {{ loop.index }}:
+{% for step in experience.chain %}
+{{ loop.index }}. {{ step.text }} [node={{ step.node }}, edge={{ step.edge }}]
+{% endfor %}
+Feedback: {{ experience.feedback }}
+{% endfor %}
+</experience>
+<current_chain>
+{% for step in chain %}
+{{ loop.index }}. {{ step.text }} [node={{ step.node }}, edge={{ step.edge }}]
+{% endfor %}
+</current_chain>
+
+Higher scores indicate greater estimated correctness and useful progress.
+An empty current chain means start from the task. Return only one concrete next
+step as text. Include its resulting state or conclusion so it can be compared
+with steps from other chains. Do not generate multiple alternatives or steps.

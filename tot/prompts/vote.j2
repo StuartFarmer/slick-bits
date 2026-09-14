@@ -1,0 +1,17 @@
+Compare the partial solutions and select the most promising one for completing the task.
+Return its one-based choice number. Consider feasibility and useful next steps.
+
+Task:
+{{ instance.task }}
+
+Evaluation criteria:
+{{ instance.criteria }}
+
+Candidates:
+{% for state in states %}
+Choice {{ loop.index }}: {{ state.thoughts | tojson }}
+{% endfor %}
+
+# Output Format
+Return only JSON matching this schema:
+{{ schema | tojson }}

@@ -1,0 +1,14 @@
+Evaluate the proposed thought's logic, correctness and usefulness toward a complete
+solution to the task. Consider all preceding steps. A useful partial step is not
+proof that the entire task has been solved. Return a score from 0 to 1, higher better.
+
+<task>{{ instance.task }}</task>
+<preceding_chain>
+{% for step in chain %}
+{{ loop.index }}. {{ step.text }} [node={{ step.node }}, edge={{ step.edge }}]
+{% endfor %}
+</preceding_chain>
+<proposed_thought>{{ thought }}</proposed_thought>
+
+# Output Format
+Return only JSON matching this schema: {{ schema | tojson }}

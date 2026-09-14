@@ -1,0 +1,15 @@
+Evaluate confidence in the transition to the proposed next thought. Check that it
+follows logically from the preceding state, preserves relevant constraints and
+does not silently change facts. For an empty chain, evaluate the transition from
+the initial task. Return a score from 0 to 1, higher confidence better.
+
+<task>{{ instance.task }}</task>
+<preceding_chain>
+{% for step in chain %}
+{{ loop.index }}. {{ step.text }}
+{% endfor %}
+</preceding_chain>
+<proposed_thought>{{ thought }}</proposed_thought>
+
+# Output Format
+Return only JSON matching this schema: {{ schema | tojson }}

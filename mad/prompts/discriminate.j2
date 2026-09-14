@@ -1,0 +1,19 @@
+You are the moderator. Evaluate both sides after the completed round and decide
+whether a correct answer has emerged.
+
+{% include "context.j2" %}
+
+<previous_judgments>
+{% for judgment in instance.judgments %}
+{{ judgment.model_dump() | tojson }}
+{% endfor %}
+</previous_judgments>
+
+Round {{ instance.round }} has ended. If there is a clear preference for an
+answer candidate, summarize your reasons and give that final answer. Otherwise,
+set answer to an empty string and explain what remains unresolved in reason.
+Agreement alone does not establish correctness; apply the evaluation criteria.
+
+# Output Format
+Return only JSON matching this schema:
+{{ schema | tojson }}

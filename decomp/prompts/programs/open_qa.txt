@@ -1,0 +1,8 @@
+QC: In which country is the manufacturer of Lost Gravity based?
+Q1: [retrieve_odqa] Which company manufactured Lost Gravity?
+#1: {"answer": "Mack Rides", "documents": [{"title": "Lost Gravity", "text": "Lost Gravity was manufactured by Mack Rides."}]}
+Q2: [retrieve_odqa] In which country is Mack Rides based?
+#2: {"answer": "Germany", "documents": [{"title": "Mack Rides", "text": "Mack Rides is based in Germany."}]}
+Q3: [multihop_qa] Evidence: #1 #2 Question: In which country is the manufacturer of Lost Gravity based?
+#3: "Germany"
+Q4: [EOQ]

@@ -1,0 +1,12 @@
+Split the requested text into words or letters. Preserve spelling, case, and order.
+If positions are requested, return [value, position] pairs with one-based positions.
+
+Q: What are the words in "Alan Mathison Turing"?
+A: ["Alan", "Mathison", "Turing"]
+Q: What are the letters in "Alan"?
+A: ["A", "l", "a", "n"]
+Q: What are the letters and their positions in "Ada"?
+A: [["A", 1], ["d", 2], ["a", 3]]
+
+Q: {{ question }}
+Return JSON with the result in answer, matching {{ schema | tojson }}.

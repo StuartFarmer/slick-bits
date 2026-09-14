@@ -1,3 +1,7 @@
-Generate a mathematical expression. Use only +, -, *, x0, x1, 0, 1.
-Parentheses are allowed. Do not use powers, function calls or other constants.
-Return the expression only as JSON; do not execute code or use tools.
+Task:
+{{ instance.task }}
+
+Create one candidate that satisfies the task.
+# Output Format
+Return JSON matching this schema:
+{{ schema | tojson }}

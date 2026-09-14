@@ -1,0 +1,12 @@
+Propose up to {{ count }} distinct next-step alternatives for this partial solution.
+Each content field must contain the complete updated partial solution, including its
+necessary earlier steps and a concise justification. Make one useful step of progress.
+Use answer=null for unfinished solutions; provide a final answer only for a complete solution.
+Return an empty candidates list when no valid continuation can be found.
+
+{% include "context.j2" %}
+<previous_candidate>{{ previous | tojson }}</previous_candidate>
+
+# Output Format
+Return only JSON matching this schema:
+{{ schema | tojson }}

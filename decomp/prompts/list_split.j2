@@ -1,0 +1,10 @@
+Split a sequence into two lists. The first contains floor(n/2) items, the second
+contains the rest. Preserve order and multiword items; return [first_half, second_half].
+
+Q: Split ["driving license", "button", "packet", "identity card", "shoe"].
+A: [["driving license", "button"], ["packet", "identity card", "shoe"]]
+Q: Split ["newspaper", "glasses", "laptop", "bottle"].
+A: [["newspaper", "glasses"], ["laptop", "bottle"]]
+
+Q: {{ question }}
+Return JSON with the result in answer, matching {{ schema | tojson }}.

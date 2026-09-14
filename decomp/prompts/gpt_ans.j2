@@ -1,0 +1,12 @@
+Extract only the final answer from the supplied solution text. Do not rely on a
+fixed phrase such as "the answer is"; return the value answering the problem.
+
+Q: There were 15 trees, then 21, so 21 - 15 = 6 trees were planted.
+A: 6
+Q: Parker needs 4 * 30 / 15 = 8 packs of gum to last 30 days.
+A: 8
+Q: Michael started with 58 balls. After losing 23 he had 35, then lost 2 more: 33 remain.
+A: 33
+
+Q: {{ question }}
+Return JSON with the final value in answer, matching {{ schema | tojson }}.

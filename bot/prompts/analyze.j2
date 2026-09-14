@@ -1,0 +1,14 @@
+Analyze the chain against the entire task, independently of its estimated scores.
+Provide an Analysis Report stating whether the chain actually completes the task
+correctly, is incomplete, or requires revision, and why.
+For every step, provide a brief analysis, an error report where appropriate,
+concrete revision advice, and a recommendation or rejection with a reason.
+Check transitions especially carefully: the chain may combine different trees.
+End with a Confidence score from 0 to 1 for your evaluation. Use plain text.
+
+<task>{{ instance.task }}</task>
+<chain>
+{% for step in chain %}
+{{ loop.index }}. {{ step.text }} [node={{ step.node }}, edge={{ step.edge }}]
+{% endfor %}
+</chain>

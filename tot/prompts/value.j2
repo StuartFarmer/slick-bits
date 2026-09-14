@@ -1,0 +1,17 @@
+Evaluate how promising this partial solution is for completing the task.
+Use a brief lookahead to check feasible continuations and identify contradictions.
+Score from 0 (impossible) to 1 (highly promising); an unfinished solution can score highly.
+Return only the score, without a written reasoning trace.
+
+Task:
+{{ instance.task }}
+
+Evaluation criteria:
+{{ instance.criteria }}
+
+Thoughts (ordered JSON array):
+{{ state.thoughts | tojson }}
+
+# Output Format
+Return only JSON matching this schema:
+{{ schema | tojson }}

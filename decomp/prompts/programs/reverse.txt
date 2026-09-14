@@ -1,0 +1,24 @@
+QC: Reverse ["laptop", "photo", "clip"].
+Q1: [reverse_base] Reverse ["laptop", "photo", "clip"].
+#1: ["clip", "photo", "laptop"]
+Q2: [EOQ]
+
+QC: Reverse [].
+Q1: [reverse_base] Reverse [].
+#1: []
+Q2: [EOQ]
+
+QC: Reverse ["driving license", "button", "packet", "identity card", "shoe"].
+Q1: [list_split] Split ["driving license", "button", "packet", "identity card", "shoe"].
+#1: [["driving license", "button"], ["packet", "identity card", "shoe"]]
+Q2: [arr_position] What is at position 1 in #1?
+#2: ["driving license", "button"]
+Q3: [arr_position] What is at position 2 in #1?
+#3: ["packet", "identity card", "shoe"]
+Q4: [reverse] Reverse #2.
+#4: ["button", "driving license"]
+Q5: [reverse] Reverse #3.
+#5: ["shoe", "identity card", "packet"]
+Q6: [merge] Concatenate lists #5 and #4.
+#6: ["shoe", "identity card", "packet", "button", "driving license"]
+Q7: [EOQ]
