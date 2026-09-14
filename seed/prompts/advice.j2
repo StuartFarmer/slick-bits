@@ -1,0 +1,15 @@
+Propose {{ count }} distinct coding strategies for this task:
+<task>{{ instance.task }}</task>
+{% for example in examples %}
+Input: {{ example.input | tojson }}
+Expected output: {{ example.output | tojson }}
+{% endfor %}
+
+Diversify the algorithms, tool choices, and interpretations of the specification.
+Each strategy should be 2-3 concise sentences and generalize beyond these examples.
+Incorrect outputs are penalized: prefer abstention on uncertain cases.
+The function will be solve(input: str); inputs are serialized task records.
+
+# Output Format
+Return only JSON matching this schema:
+{{ schema | tojson }}

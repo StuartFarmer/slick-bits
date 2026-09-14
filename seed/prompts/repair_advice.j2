@@ -1,0 +1,12 @@
+Suggest {{ count }} distinct ways to fix this function for the task:
+<task>{{ instance.task }}</task>
+<code>{{ code }}</code>
+Observed failures on development examples:
+{{ errors | tojson }}
+
+Each strategy should be 2-3 concise sentences. Fix the underlying rule and generalize
+beyond these failures. Incorrect answers are penalized; retain abstention where uncertain.
+
+# Output Format
+Return only JSON matching this schema:
+{{ schema | tojson }}

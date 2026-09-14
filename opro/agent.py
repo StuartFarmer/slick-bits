@@ -62,9 +62,9 @@ class OPRO:
     async def _propose_batch(
         self, history_size: int, proposals_per_step: int, exemplars: Sequence[str]
     ) -> list[str]:
-        trajectory = sorted(
-            self.archive, key=lambda p: p["score"], reverse=not self.maximize
-        )[-history_size:]
+        trajectory = sorted(self.archive, key=lambda p: p["score"], reverse=not self.maximize)[
+            -history_size:
+        ]
         proposals = []
         for _ in range(proposals_per_step):
             self.optimizer_calls += 1

@@ -33,11 +33,13 @@ with individual implementations, official sources, usage contracts and documente
 | [LLM genetic improvement (2025)](llm_gi_2025/README.md) | Journal prompts, reversible add/remove patches, and independent searches over hot methods |
 | [EoH-S](eoh_s/README.md) | Complementary heuristic sets with farthest-pair search, local refinement, and greedy CPI selection |
 | [EvoPrompt](evoprompt/README.md) | Genetic and differential evolution of prompts |
+| [EvoPrompting](evoprompting/README.md) | Metric-conditioned candidate evolution with parent retirement and soft prompt-tuning callbacks |
 | [EvoX](evox/README.md) | Co-evolve artifacts and executable search strategies using stagnation feedback |
 | [ExpeL](expel/README.md) | Experience gathering, cross-task insight voting, successful-task retrieval, and knowledge transfer |
 | [GEPA](gepa/README.md) | Reflective prompt mutation, instance-wise Pareto selection, and system-aware merge |
 | [HMAW](hmaw/README.md) | CEO → Manager → Worker prompt optimization with the original query at every stage |
 | [In-context QD](in_context_qd/README.md) | Generate candidates from archive context to fill diverse niches and improve their measured fitness |
+| [Interactive evolution](interactive_evolution/README.md) | Human-feedback-gated steady-state text evolution with tournament selection, crossover, and focused mutation |
 | [Forest of Thought](fot/README.md) | Independent ToT/MCTSr trees, dynamic correction, sparse activation, and consensus/expert selection |
 | [Graph of Thoughts](got/README.md) | Custom operation graphs with branching, aggregation, refinement, and local or model scoring |
 | [LLMGP](llm_gp/README.md) | Model variation, optional model selection and replacement |
@@ -55,6 +57,7 @@ with individual implementations, official sources, usage contracts and documente
 | [Optimizing the Optimizer](optimizing_the_optimizer/README.md) | Measured heuristic-improvement dialogue and generic CMSA with age-weighted V1/V2 construction |
 | [Plan of Thoughts](pot/README.md) | History-based UCT with continue/rollback/think actions and sequential rollouts |
 | [Prompt Programming](prompt_programming/README.md) | Task specification, multipart metaprompts, and counterfactual fragment insertion |
+| [Promptbreeder](promptbreeder/README.md) | Co-evolve task prompts, mutation prompts, and verified contexts through binary tournaments |
 | [PROMST](promst/README.md) | Categorized human feedback, global beam search, and a five-Longformer score ensemble |
 | [QUBE](qube/README.md) | Quality–uncertainty search across clustered islands |
 | [Rationale-augmented ensembles](rationale_ensembles/README.md) | Fixed, shuffled, or sampled-rationale prompts with plurality voting |
@@ -63,6 +66,7 @@ with individual implementations, official sources, usage contracts and documente
 | [Reflexion](reflexion/README.md) | Evaluated trials, verbal self-reflection, and bounded episodic memory |
 | [Self-consistency](self_consistency/README.md) | Independent reasoning samples and majority voting over task-defined final answers |
 | [SELF-REFINE](self_refine/README.md) | Same-model feedback and iterative refinement with full output history |
+| [SPELL](spell/README.md) | Semantic prompt reproduction, exponential roulette selection, and elite preservation |
 | [STaR](star/README.md) | Generate rationales, rationalize failures, and fine-tune the original model on correct solutions |
 | [Strategy finding](strategy_finding/README.md) | Categorized signal discovery, confidence/risk selection, and a ten-ReLU numeric combiner |
 | [TAUCHI-GPT](tauchi_gpt/README.md) | Local retrieval, task execution, optional reflection cycles, result memory, and task reprioritization |

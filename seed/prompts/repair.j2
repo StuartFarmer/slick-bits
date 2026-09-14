@@ -1,0 +1,15 @@
+Repair this Python function for the task:
+<task>{{ instance.task }}</task>
+<code>{{ code }}</code>
+Observed failures on development examples:
+{{ errors | tojson }}
+Advice: {{ advice }}
+
+Preserve solve(input: str), returning {"value": answer} when confident or None to
+abstain. A legitimate null answer is {"value": None}. Generalize rather than
+memorizing these failures. Do not call an LLM or train a model in this code.
+Use only dependencies and capabilities authorized in the task specification.
+
+# Output Format
+Return only JSON with the complete Python source, without Markdown fences:
+{{ schema | tojson }}

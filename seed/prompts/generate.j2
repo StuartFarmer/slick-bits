@@ -1,0 +1,17 @@
+Write a Python function solve(input: str) for this task:
+<task>{{ instance.task }}</task>
+Strategy: {{ advice }}
+{% for example in examples %}
+Input: {{ example.input | tojson }}
+Expected output: {{ example.output | tojson }}
+{% endfor %}
+
+Generalize beyond the examples. Do not call an LLM or train a model in this code.
+Return {"value": answer} for a confident answer and None to abstain. The wrapper
+distinguishes a legitimate null answer ({"value": None}) from abstention.
+The caller's execution adapter converts this result into a Prediction or None.
+Use only dependencies and capabilities authorized in the task specification.
+
+# Output Format
+Return only JSON with the Python source, without Markdown fences:
+{{ schema | tojson }}

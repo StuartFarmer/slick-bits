@@ -1,0 +1,10 @@
+Generate {{ count }} diverse development test cases for this task:
+<task>{{ instance.task }}</task>
+
+Focus on representative rules and likely failures. Serialize each input as a string
+in the task's input format and provide its expected JSON output. These cases are
+pseudo-labels for code refinement, not independent evidence of correctness.
+
+# Output Format
+Return only JSON matching this schema:
+{{ schema | tojson }}

@@ -129,3 +129,8 @@ Scripted-provider checks cover both score directions, frozen batches, bounded
 history, duplicate accounting, example sampling, stopping, empty seeds, tagged
 output, raw failure records, and evaluator/transport failures. These verify the
 algorithm and Slick integration; they do not reproduce the paper's accuracies.
+
+Development verification also compared 20 history selections (including ties
+and negative scores) against the official `gen_ins_and_score_pairs_substr`
+function with its score threshold disabled, and ran the example above with
+scripted responses from `/tmp`. Both passed without model API calls.

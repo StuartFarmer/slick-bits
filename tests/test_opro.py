@@ -137,7 +137,9 @@ class OPROTests(unittest.IsolatedAsyncioTestCase):
                 raise RuntimeError("evaluation failed")
             return 1
 
-        agent = OPRO("Optimize JSON configurations.", ScriptedProvider(["<TEXT>candidate</TEXT>"]), fail)
+        agent = OPRO(
+            "Optimize JSON configurations.", ScriptedProvider(["<TEXT>candidate</TEXT>"]), fail
+        )
         rendered = await OPRO.propose.render(agent, [], [])
         self.assertIn("candidate solution", rendered)
         self.assertNotIn("Generate an instruction", rendered)

@@ -77,7 +77,9 @@ class SPELLTests(unittest.IsolatedAsyncioTestCase):
             self.assertEqual(agent.evaluations, evaluations)
             self.assertEqual(agent.optimizer_calls, 1)
             self.assertEqual(agent.attempts[-1]["status"], status)
-            self.assertEqual(agent.attempts[-1]["raw_response"], raw if isinstance(raw, str) else None)
+            self.assertEqual(
+                agent.attempts[-1]["raw_response"], raw if isinstance(raw, str) else None
+            )
             self.assertEqual(agent.population, [Individual("seed", 1)])
 
     async def test_paper_defaults_duplicate_initialization_and_no_evaluation_cache(self):
@@ -113,8 +115,15 @@ class SPELLTests(unittest.IsolatedAsyncioTestCase):
                 rendered = await SPELL.reproduce.render(agent, [Individual("Be concrete", 0.8)])
             finally:
                 os.chdir(previous)
-        sections = ["Explain a technical concept", "A prompt is to guide", "I want you to generate",
-                    "Be concrete", "0.8", "Now, generate only one", "inside curly brackets"]
+        sections = [
+            "Explain a technical concept",
+            "A prompt is to guide",
+            "I want you to generate",
+            "Be concrete",
+            "0.8",
+            "Now, generate only one",
+            "inside curly brackets",
+        ]
         positions = [rendered.index(section) for section in sections]
         self.assertEqual(positions, sorted(positions))
         template = Path(__file__).resolve().parents[1] / "spell/prompts/reproduce.j2"

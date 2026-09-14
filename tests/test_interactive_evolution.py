@@ -35,8 +35,12 @@ class InteractiveEvolutionTests(unittest.IsolatedAsyncioTestCase):
         with patch("slick.prompts.TEMPLATE_ROOT", PROMPTS):
             agent = InteractiveEvolution("brief", provider, evaluate, mutation_topics=["resources"])
             result = await agent.run(
-                initial=["seed A"], population_size=2, iterations=1,
-                new_evaluations=3, crossover_probability=1, seed=4,
+                initial=["seed A"],
+                population_size=2,
+                iterations=1,
+                new_evaluations=3,
+                crossover_probability=1,
+                seed=4,
             )
         self.assertEqual([p.content for p in result], ["seed A", "child"])
         self.assertEqual(agent.completed_iterations, 1)
@@ -69,8 +73,12 @@ class InteractiveEvolutionTests(unittest.IsolatedAsyncioTestCase):
         with patch("slick.prompts.TEMPLATE_ROOT", PROMPTS):
             agent = InteractiveEvolution("brief", provider, evaluate, mutation_topics=["method"])
             result = await agent.run(
-                initial=["best", "other"], population_size=2, iterations=2,
-                new_evaluations=2, crossover_probability=0, seed=2,
+                initial=["best", "other"],
+                population_size=2,
+                iterations=2,
+                new_evaluations=2,
+                crossover_probability=0,
+                seed=2,
             )
         self.assertEqual([calls for _, calls in seen], [0, 1, 1, 2])
         self.assertEqual([p.id for p in result], [0, 3])
@@ -78,12 +86,12 @@ class InteractiveEvolutionTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(agent.archive[2].parents, (0,))
         self.assertEqual(agent.completed_iterations, 2)
 
-    async def test_late_votes_are_archived_without_unlocking_selection(self):
+    async def test_late_votes_count_toward_trigger_but_child_still_needs_feedback(self):
         batches = iter(
             [
                 [Evaluation(0, 1), Evaluation(1, -1)],
-                [Evaluation(1, 1)] * 10 + [Evaluation(2, 0)],
-                [Evaluation(0, 1)],
+                [Evaluation(1, 1)] * 10,
+                [Evaluation(2, 0)],
                 [Evaluation(3, 0)],
             ]
         )
@@ -97,8 +105,11 @@ class InteractiveEvolutionTests(unittest.IsolatedAsyncioTestCase):
         with patch("slick.prompts.TEMPLATE_ROOT", PROMPTS):
             agent = InteractiveEvolution("brief", provider, evaluate, mutation_topics=["method"])
             await agent.run(
-                initial=["best", "worst"], population_size=2, iterations=2,
-                new_evaluations=2, crossover_probability=0,
+                initial=["best", "worst"],
+                population_size=2,
+                iterations=2,
+                new_evaluations=2,
+                crossover_probability=0,
             )
         self.assertEqual(calls, [0, 1, 1, 2])
         self.assertEqual(len(agent.archive[1].ratings), 11)
@@ -115,8 +126,11 @@ class InteractiveEvolutionTests(unittest.IsolatedAsyncioTestCase):
                 )
                 with self.assertRaises(error):
                     await agent.run(
-                        initial=["a", "b"], population_size=2, iterations=1,
-                        new_evaluations=2, crossover_probability=0,
+                        initial=["a", "b"],
+                        population_size=2,
+                        iterations=1,
+                        new_evaluations=2,
+                        crossover_probability=0,
                     )
                 self.assertEqual([p.content for p in agent.population], ["a", "b"])
                 self.assertEqual(agent.completed_iterations, 0)
@@ -125,12 +139,64 @@ class InteractiveEvolutionTests(unittest.IsolatedAsyncioTestCase):
                 if response == "  ":
                     self.assertEqual(agent.attempts[0]["raw_response"], response)
 
+        with patch("slick.prompts.TEMPLATE_ROOT", PROMPTS):
+            agent = InteractiveEvolution(
+                "brief",
+                ScriptedProvider(["combined", "  "]),
+                evaluate,
+                mutation_topics=["method"],
+            )
+            with self.assertRaisesRegex(ValueError, "blank"):
+                await agent.run(
+                    initial=["a", "b"],
+                    population_size=2,
+                    iterations=1,
+                    new_evaluations=2,
+                    crossover_probability=1,
+                )
+        self.assertEqual([p.content for p in agent.population], ["a", "b"])
+        self.assertEqual(agent.completed_iterations, 0)
+        self.assertEqual([r["raw_response"] for r in agent.attempts], ["combined", "  "])
+
+    async def test_mean_vote_selection_and_minimum_coverage_including_final_child(self):
+        provider = ScriptedProvider(["child"])
+        batches = iter(
+            [
+                [Evaluation(0, 1)] * 5 + [Evaluation(0, -1), Evaluation(1, 1)],
+                [Evaluation(1, 1)],
+                [Evaluation(2, -1)],
+                [Evaluation(2, 1)],
+            ]
+        )
+        calls = []
+
+        async def evaluate(population):
+            calls.append(len(provider.calls))
+            return next(batches)
+
+        with patch("slick.prompts.TEMPLATE_ROOT", PROMPTS):
+            agent = InteractiveEvolution("brief", provider, evaluate, mutation_topics=["method"])
+            result = await agent.run(
+                initial=["many votes", "higher mean"],
+                population_size=2,
+                iterations=1,
+                new_evaluations=2,
+                min_evaluations=2,
+                crossover_probability=0,
+            )
+        self.assertEqual(calls, [0, 0, 1, 1])
+        self.assertEqual([p.id for p in result], [1, 2])
+        self.assertEqual(agent.archive[0].fitness, 2 / 3)
+        self.assertEqual(agent.archive[2].fitness, 0)
+        self.assertEqual(agent.archive[2].parents, (1,))
+
     async def test_bad_feedback_batch_is_atomic_and_empty_batch_stops(self):
         for batch, error in [
             ([Evaluation(0, 1), Evaluation(9, 1)], KeyError),
             ([Evaluation(0, 1), Evaluation(1, 9)], KeyError),
             ([], RuntimeError),
         ]:
+
             async def evaluate(population):
                 return batch
 
@@ -148,9 +214,14 @@ class InteractiveEvolutionTests(unittest.IsolatedAsyncioTestCase):
             return [Evaluation(p.id, 0) for p in population]
 
         provider = ScriptedProvider([" first ", "second", "third", "fourth"])
-        agent = InteractiveEvolution("custom brief", provider, evaluate, mutation_topics=["structure"])
+        agent = InteractiveEvolution(
+            "custom brief", provider, evaluate, mutation_topics=["structure"]
+        )
         previous_directory = Path.cwd()
-        with tempfile.TemporaryDirectory() as directory, patch("slick.prompts.TEMPLATE_ROOT", PROMPTS):
+        with (
+            tempfile.TemporaryDirectory() as directory,
+            patch("slick.prompts.TEMPLATE_ROOT", PROMPTS),
+        ):
             try:
                 os.chdir(directory)
                 for _ in range(2):

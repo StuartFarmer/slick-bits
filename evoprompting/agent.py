@@ -59,7 +59,9 @@ class Attempt:
     targets: dict[str, float]
     temperature: float
     raw: str = ""
-    status: Literal["pending", "accepted", "duplicate", "filtered", "rejected", "failed"] = "pending"
+    status: Literal["pending", "accepted", "duplicate", "filtered", "rejected", "failed"] = (
+        "pending"
+    )
     error: str = ""
 
 
@@ -144,7 +146,9 @@ class EvoPrompting:
             or evaluation.cost <= 0
             or not all(math.isfinite(x) for x in evaluation.metrics.values())
         ):
-            raise CandidateRejected("measured error, positive cost, fitness and metrics must be finite")
+            raise CandidateRejected(
+                "measured error, positive cost, fitness and metrics must be finite"
+            )
         return Individual(content, evaluation, score)
 
     async def _initialize(self, seeds: Sequence[str]) -> tuple[Individual, ...]:
@@ -163,7 +167,9 @@ class EvoPrompting:
             examples = tuple(self.rng.choices(parents, k=self.examples_per_prompt))
             targets = self.targets(examples)
             for _ in range(self.samples_per_prompt):
-                attempt = Attempt(round, examples, dict(targets), self.rng.choice(self.temperatures))
+                attempt = Attempt(
+                    round, examples, dict(targets), self.rng.choice(self.temperatures)
+                )
                 self.attempts.append(attempt)
                 attempts.append(attempt)
                 try:

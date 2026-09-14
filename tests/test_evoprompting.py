@@ -2,6 +2,8 @@
 
 import asyncio
 import importlib.util
+import os
+import tempfile
 import unittest
 from pathlib import Path
 from unittest.mock import patch
@@ -13,6 +15,62 @@ from tests.providers import ScriptedProvider
 
 
 class EvoPromptingChecks(unittest.TestCase):
+    def test_bound_template_from_another_launch_directory(self):
+        from evoprompting import Evaluation, EvoPrompting, Individual
+
+        async def check():
+            agent = EvoPrompting("Arrange a seminar.", None, None, tune=None)
+            parent = Individual("first candidate", Evaluation(0.2, 100), -20)
+            rendered = await EvoPrompting.crossmut.render(agent, (parent,), {"cost": 90})
+            self.assertIn(agent.task, rendered)
+            self.assertLess(rendered.index("first candidate"), rendered.index('"cost": 90'))
+            self.assertEqual(rendered.count('"""Metrics:'), 2)
+
+        root = Path(__file__).resolve().parents[1] / "evoprompting/prompts"
+        cwd = Path.cwd()
+        with (
+            tempfile.TemporaryDirectory() as directory,
+            patch.object(prompts, "TEMPLATE_ROOT", root),
+        ):
+            try:
+                os.chdir(directory)
+                asyncio.run(check())
+            finally:
+                os.chdir(cwd)
+
+    def test_multiple_prompts_and_empty_training_skip(self):
+        from evoprompting import Evaluation, EvoPrompting
+
+        async def check():
+            provider = ScriptedProvider(["a", "b", "c", "d", "e", "f", "g", "h"])
+
+            async def evaluate(content):
+                return Evaluation(0.1, 100)
+
+            async def tune(*args):
+                self.fail("all accepted children were selected; training must be skipped")
+
+            result = await EvoPrompting(
+                "Plan a seminar.",
+                lambda temperature: provider,
+                evaluate,
+                tune=tune,
+                rounds=2,
+                prompts_per_round=2,
+                samples_per_prompt=2,
+                survivors=4,
+            ).run(["seed"])
+            self.assertEqual(len(result.attempts), 8)
+            self.assertEqual(result.evaluations, 9)
+            self.assertTrue(all(not r.training for r in result.history))
+            for i in range(0, 8, 2):
+                self.assertEqual(provider.calls[i], provider.calls[i + 1])
+
+        with patch.object(
+            prompts, "TEMPLATE_ROOT", Path(__file__).resolve().parents[1] / "evoprompting/prompts"
+        ):
+            asyncio.run(check())
+
     def test_algorithm(self):
         self.assertIsNotNone(importlib.util.find_spec("evoprompting"), "implement EvoPrompting")
         from evoprompting import Evaluation, EvoPrompting
@@ -38,8 +96,14 @@ class EvoPromptingChecks(unittest.TestCase):
                 return Evaluation(error=0.1, cost={"seed": 1, "a": 2, "b": 3}.get(content, 10))
 
             agent = EvoPrompting(
-                "Improve a workshop plan.", factory, evaluate, tune=tune,
-                rounds=3, prompts_per_round=1, samples_per_prompt=3, survivors=1,
+                "Improve a workshop plan.",
+                factory,
+                evaluate,
+                tune=tune,
+                rounds=3,
+                prompts_per_round=1,
+                samples_per_prompt=3,
+                survivors=1,
             )
             result = await agent.run(["seed"])
             self.assertEqual(len(result.attempts), 9)
@@ -60,7 +124,9 @@ class EvoPromptingChecks(unittest.TestCase):
             self.assertEqual(len(result.attempts[0].parents), 2)  # sampling with replacement
             self.assertIs(result.provider, next_factory)
 
-        with patch.object(prompts, "TEMPLATE_ROOT", Path(__file__).resolve().parents[1] / "evoprompting/prompts"):
+        with patch.object(
+            prompts, "TEMPLATE_ROOT", Path(__file__).resolve().parents[1] / "evoprompting/prompts"
+        ):
             asyncio.run(check())
 
     def test_rejections_budget_and_raw_text(self):
@@ -82,19 +148,35 @@ class EvoPromptingChecks(unittest.TestCase):
                 return Evaluation(error=0.1, cost=1)
 
             result = await EvoPrompting(
-                "Rewrite a function body.", lambda temperature: provider, evaluate, tune=None,
-                rounds=1, prompts_per_round=1, samples_per_prompt=7,
+                "Rewrite a function body.",
+                lambda temperature: provider,
+                evaluate,
+                tune=None,
+                rounds=1,
+                prompts_per_round=1,
+                samples_per_prompt=7,
             ).run(["seed", "seed"])
             self.assertEqual(result.evaluations, 5)
             self.assertEqual(evaluated, ["seed", "bad", "threshold", "nan", code])
-            self.assertEqual([a.status for a in result.attempts], [
-                "duplicate", "rejected", "duplicate", "filtered", "rejected", "rejected", "accepted",
-            ])
+            self.assertEqual(
+                [a.status for a in result.attempts],
+                [
+                    "duplicate",
+                    "rejected",
+                    "duplicate",
+                    "filtered",
+                    "rejected",
+                    "rejected",
+                    "accepted",
+                ],
+            )
             self.assertEqual(result.attempts[5].raw, " ")
             self.assertEqual(result.best.content, code)
             self.assertEqual(result.stop_reason, "rounds")
 
-        with patch.object(prompts, "TEMPLATE_ROOT", Path(__file__).resolve().parents[1] / "evoprompting/prompts"):
+        with patch.object(
+            prompts, "TEMPLATE_ROOT", Path(__file__).resolve().parents[1] / "evoprompting/prompts"
+        ):
             asyncio.run(check())
 
     def test_custom_metrics_and_empty_pool(self):
@@ -106,9 +188,14 @@ class EvoPromptingChecks(unittest.TestCase):
 
             provider = ScriptedProvider(["seed", "seed"])
             agent = EvoPrompting(
-                "Optimize a query.", lambda temperature: provider, evaluate, tune=None,
-                targets=lambda parents: {"latency": 2}, rounds=5,
-                prompts_per_round=1, samples_per_prompt=2,
+                "Optimize a query.",
+                lambda temperature: provider,
+                evaluate,
+                tune=None,
+                targets=lambda parents: {"latency": 2},
+                rounds=5,
+                prompts_per_round=1,
+                samples_per_prompt=2,
             )
             result = await agent.run(["seed"])
             self.assertEqual(result.stop_reason, "no_parents")
@@ -126,7 +213,9 @@ class EvoPromptingChecks(unittest.TestCase):
 
         root = Path(__file__).resolve().parents[1] / "evoprompting/prompts"
         for template in root.glob("*.j2"):
-            self.assertFalse(list(Environment().parse(template.read_text()).find_all((nodes.If, nodes.CondExpr))))
+            self.assertFalse(
+                list(Environment().parse(template.read_text()).find_all((nodes.If, nodes.CondExpr)))
+            )
         with patch.object(prompts, "TEMPLATE_ROOT", root):
             asyncio.run(check())
 
@@ -144,14 +233,20 @@ class EvoPromptingChecks(unittest.TestCase):
 
             for responses, tuner, message in (
                 ([RuntimeError("transport failed")], None, "transport failed"),
-                (["boom"], None, "evaluation infrastructure failed"),
+                (["boom", "unused"], None, "evaluation infrastructure failed"),
                 (["a", "b"], tune, "training failed"),
                 ([asyncio.CancelledError()], None, None),
             ):
                 provider = ScriptedProvider(responses)
                 agent = EvoPrompting(
-                    "Optimize text.", lambda temperature: provider, evaluate, tune=tuner,
-                    rounds=2, prompts_per_round=1, samples_per_prompt=2, survivors=1,
+                    "Optimize text.",
+                    lambda temperature: provider,
+                    evaluate,
+                    tune=tuner,
+                    rounds=2,
+                    prompts_per_round=1,
+                    samples_per_prompt=2,
+                    survivors=1,
                 )
                 if message:
                     with self.assertRaisesRegex(RuntimeError, message):
@@ -160,11 +255,14 @@ class EvoPromptingChecks(unittest.TestCase):
                     # ScriptedProvider does not raise BaseException instances.
                     async def cancel(content):
                         raise asyncio.CancelledError
+
                     agent.evaluate = cancel
                     with self.assertRaises(asyncio.CancelledError):
                         await agent.run(["seed"])
 
-        with patch.object(prompts, "TEMPLATE_ROOT", Path(__file__).resolve().parents[1] / "evoprompting/prompts"):
+        with patch.object(
+            prompts, "TEMPLATE_ROOT", Path(__file__).resolve().parents[1] / "evoprompting/prompts"
+        ):
             asyncio.run(check())
 
 

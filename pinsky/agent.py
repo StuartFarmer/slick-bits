@@ -150,7 +150,10 @@ class PINSKY:
         if self.mutate is not None:
             return self.check_environment(await self.mutate(environment, operation, self.rng))
         provider = _RecordingProvider(self.provider, self.result.generations)
-        return await getattr(self, operation)(environment, provider=provider)
+        try:
+            return await getattr(self, operation)(environment, provider=provider)
+        except ValidationError as exc:
+            raise CandidateRejected(f"Invalid environment response: {exc}") from exc
 
     async def assess(self, environment: str, parameters: np.ndarray) -> Evaluation:
         self.result.evaluation_calls += 1
@@ -169,9 +172,11 @@ class PINSKY:
             try:
                 if self.rng.random() < config.mutation_rate:
                     while True:
-                        operation = str(self.rng.choice(
-                            ["remove", "add", "move"], p=config.operation_probabilities
-                        ))
+                        operation = str(
+                            self.rng.choice(
+                                ["remove", "add", "move"], p=config.operation_probabilities
+                            )
+                        )
                         attempt.operations.append(operation)
                         attempt.environment = await self.edit(attempt.environment, operation)
                         if self.rng.random() >= config.continuation_rate:
@@ -180,15 +185,17 @@ class PINSKY:
                 attempt.strong_solved = await self.strong_solve(attempt.environment)
                 self.result.solver_calls += 1
                 attempt.random_solved = await self.random_solve(attempt.environment)
-            except (CandidateRejected, ValidationError) as exc:
+            except CandidateRejected as exc:
                 attempt.error = str(exc)
                 continue
             if attempt.random_solved or not attempt.strong_solved:
                 continue
             attempt.accepted = True
-            self.result.active.append(Pair(
-                attempt.id, parent.id, iteration, attempt.environment, parent.parameters.copy()
-            ))
+            self.result.active.append(
+                Pair(
+                    attempt.id, parent.id, iteration, attempt.environment, parent.parameters.copy()
+                )
+            )
         excess = max(0, len(self.result.active) - config.max_environments)
         self.result.retired.extend(self.result.active[:excess])
         del self.result.active[:excess]
@@ -198,9 +205,10 @@ class PINSKY:
         population = self.rng.uniform(-1, 1, (config.population_size, pair.parameters.size))
         population[0] = pair.parameters
         population = np.clip(population, config.lower_bound, config.upper_bound)
-        scores = np.array([
-            (await self.assess(pair.environment, parameters)).score for parameters in population
-        ])
+        scores = np.array(
+            [(await self.assess(pair.environment, parameters)).score for parameters in population],
+            dtype=float,
+        )
         for start in range(0, config.de_evaluations, config.population_size):
             count = min(config.population_size, config.de_evaluations - start)
             trials, trial_scores = [], []
@@ -209,7 +217,8 @@ class PINSKY:
                 a, b, c = self.rng.choice(donors, size=3, replace=False)
                 donor = np.clip(
                     population[a] + config.scaling_factor * (population[b] - population[c]),
-                    config.lower_bound, config.upper_bound,
+                    config.lower_bound,
+                    config.upper_bound,
                 )
                 forced = self.rng.integers(pair.parameters.size)
                 mask = self.rng.random(pair.parameters.size) < config.crossover_rate
@@ -234,8 +243,7 @@ class PINSKY:
         pairs = self.result.active
         agents = [pair.parameters.copy() for pair in pairs]
         measurements = [
-            [await self.assess(target.environment, agent) for agent in agents]
-            for target in pairs
+            [await self.assess(target.environment, agent) for agent in agents] for target in pairs
         ]
         for target_index, target in enumerate(pairs):
             row = measurements[target_index]
@@ -245,10 +253,15 @@ class PINSKY:
                     winner = source_index
             if winner != target_index:
                 target.parameters = agents[winner].copy()
-                self.result.transfers.append(Transfer(
-                    iteration, pairs[winner].id, target.id,
-                    row[target_index].score, row[winner].score,
-                ))
+                self.result.transfers.append(
+                    Transfer(
+                        iteration,
+                        pairs[winner].id,
+                        target.id,
+                        row[target_index].score,
+                        row[winner].score,
+                    )
+                )
             target.evaluation = row[winner]
 
     async def run(
