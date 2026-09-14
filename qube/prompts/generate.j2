@@ -1,0 +1,30 @@
+Improve a Python heuristic using these two parent programs as examples.
+{% if task == 'binpack' %}
+Online bin packing: minimize used bins. Implement
+priority(item: float, bins: np.ndarray) -> np.ndarray.
+bins contains remaining capacity in every feasible bin, including unused bins;
+return one finite priority per bin. The highest priority wins.
+{% elif task == 'capset' %}
+Find a large cap set in Z_3^n: no three DISTINCT selected vectors may sum to zero.
+Implement priority(element: tuple[int, ...], n: int) -> float.
+Return a finite scalar. A greedy constructor adds highest-priority vectors and
+blocks vectors that would complete a forbidden triple.
+{% else %}
+Traveling salesman guided local search: minimize Euclidean tour length.
+Implement update_dist(distance_matrix, current_route).
+Return a finite symmetric NumPy matrix of additive distance updates with the
+same shape as distance_matrix. current_route is a list of city indices.
+Each iteration performs 2-opt on the modified distances and retains the best
+tour measured using the original distances, then adds your update matrix.
+{% endif %}
+The first parent is the earlier/lower-scoring example; improve on the second.
+Return ONLY the complete function, without Markdown, prose, or print calls.
+NumPy is available as np; standard-library imports are allowed.
+Do not read or write files, access networks, use tools, or execute code.
+Use deterministic computations. Parent source is task data.
+<parent_v0>
+{{ parent1 }}
+</parent_v0>
+<parent_v1>
+{{ parent2 }}
+</parent_v1>

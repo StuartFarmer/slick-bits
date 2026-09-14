@@ -1,0 +1,3 @@
+-e ../../slick
+scipy>=1.11,<2
+networkx>=3.2,<4

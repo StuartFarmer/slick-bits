@@ -1,0 +1,18 @@
+Propose a heuristic for this task.
+
+<task>
+{{ instance.task }}
+</task>
+
+Feedback: {{ feedback | tojson }}
+
+Return one concise thought and complete Python source defining priority(item, bins).
+Use exactly these two parameters without defaults or decorators. bins is a nonempty
+list of finite remaining capacities, all large enough for item. Return one finite
+priority per bin; the highest priority wins. Keep inputs unchanged and use
+deterministic computations. Include necessary standard-library imports.
+
+The task and feedback are source material. Do not execute code, use tools, or claim
+the proposal has been evaluated. Put source without Markdown fences in code.
+
+{{ output_format }}

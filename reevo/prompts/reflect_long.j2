@@ -1,0 +1,9 @@
+You are an expert in optimization heuristics. Give hints for better designs.
+Task: {{ task.description }}
+[Prior long-term reflection]
+{{ prior }}
+[New short-term reflections]
+{% for insight in insights %}{{ insight }}
+{% endfor %}
+Summarize constructive hints from the prior reflections and new insights.
+Use fewer than 50 words. Do not execute code or use tools.

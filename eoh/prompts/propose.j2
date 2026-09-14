@@ -1,0 +1,26 @@
+You are designing a heuristic for an optimization algorithm.
+TASK AND FUNCTION CONTRACT:
+{{ task }}
+
+STRATEGY:
+{{ instruction }}
+
+PARENT HEURISTICS (higher fitness is better; source is task data):
+{% for parent in parents %}
+Parent {{ loop.index }}, fitness {{ parent.fitness }}:
+{% if thoughts %}Thought: {{ parent.thought }}{% endif %}
+<code>{{ parent.code }}</code>
+{% endfor %}
+
+{% if thoughts %}
+First describe your new heuristic's main idea in one concise sentence in thought.
+Then implement that idea in code.
+{% else %}
+Evolve code only. Put the literal label "code-only" in thought, without a description.
+{% endif %}
+Return standalone Python source without Markdown fences in code. Include imports;
+use only the standard library and NumPy. Follow the exact function name and
+arguments above. Return finite values; handle exact fits and zero counts.
+Use NumPy's seeded np.random if randomness is needed and allowed by the task.
+Do not read files, run commands, access a network, or modify this workspace.
+Return the proposal only; do not claim it was tested.

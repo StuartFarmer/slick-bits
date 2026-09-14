@@ -1,0 +1,2 @@
+-e ../../slick[litellm]
+numpy>=2,<3

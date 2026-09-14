@@ -1,0 +1,20 @@
+{
+  "prompts": [
+    "Classify the sentiment of the text as positive or negative. Return only the label.",
+    "Read the review and label it positive or negative, without any other text."
+  ],
+  "demonstrations": [
+    {"input": "I love this product.", "target": "positive"},
+    {"input": "I hate this product.", "target": "negative"}
+  ],
+  "dev": [
+    {"input": "The film was great.", "target": "positive"},
+    {"input": "The acting was awful.", "target": "negative"},
+    {"input": "A good story.", "target": "positive"},
+    {"input": "A bad ending.", "target": "negative"}
+  ],
+  "test": [
+    {"input": "A great soundtrack.", "target": "positive"},
+    {"input": "An awful script.", "target": "negative"}
+  ]
+}

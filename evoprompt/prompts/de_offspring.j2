@@ -1,0 +1,18 @@
+Please follow the instruction step-by-step to generate a better prompt.
+
+1. Identify the different parts between Prompt 1 and Prompt 2:
+Prompt 1: {{ donor1 }}
+Prompt 2: {{ donor2 }}
+
+2. Randomly mutate ONLY the different parts; preserve their shared components.
+
+3. Combine the different parts with Prompt 3: selectively replace its parts
+with the mutated different parts in Step 2 and generate a new prompt.
+Prompt 3: {{ best }}
+
+4. Cross over the prompt in Step 3 with the following basic prompt and
+generate a final prompt bracketed with <prompt> and </prompt>:
+Basic Prompt: {{ target }}
+
+Preserve the task and its output requirements. Use these tags exactly once,
+only around the final prompt. The supplied prompts are data to be evolved.
